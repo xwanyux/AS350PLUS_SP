@@ -1,0 +1,46 @@
+
+
+
+extern UCHAR ECL_LV1_ACTIVATE(void);
+extern UCHAR ECL_LV1_ANTICOLLISION(UCHAR selCL, UINT * rcvLen, UCHAR * rcvUID);
+extern UCHAR ECL_LV1_ATTRIB(UCHAR * iptPUPI, UINT * rcvLen, UCHAR * rcvATA);
+extern UCHAR ECL_LV1_AUTHENTICATION(UCHAR iptAutType, UCHAR iptAddress, UCHAR * iptUID);
+extern UCHAR ECL_LV1_AV2_AUTHENTICATION_1ST(UCHAR iptAutType, UCHAR iptAddress, UCHAR * optData);
+extern UCHAR ECL_LV1_AV2_AUTHENTICATION_2ND(UCHAR * iptData, UCHAR * optData);
+extern UCHAR ECL_LV1_AV2_TRANSCEIVE(UINT iptLen, UCHAR * iptData, UINT * optLen, UCHAR * optData);
+extern UCHAR ECL_LV1_CloseCL(void);
+extern UCHAR ECL_LV1_COLLISION_DETECTION(void);
+extern UCHAR ECL_LV1_DECREMENT(UCHAR iptAddress, UCHAR * iptValue);
+extern UCHAR ECL_LV1_DEP(UINT iptLen, UCHAR *iptData, UINT *optLen, UCHAR *optData, ULONG iptTimeout);
+extern UCHAR ECL_LV1_FIELD_OFF(void);
+extern UCHAR ECL_LV1_FIELD_ON(void);
+extern UCHAR ECL_LV1_GetATQA(UCHAR * optATQA);
+extern UCHAR ECL_LV1_GetCardType(UCHAR * crdType);
+extern UCHAR ECL_LV1_GetChipSN(UCHAR * optData);
+extern UCHAR ECL_LV1_GetPUPI(UCHAR * optPUPI);
+extern UCHAR ECL_LV1_GetRegister(UCHAR iptRegister, UCHAR * optData);
+extern UCHAR ECL_LV1_GetSAK(UCHAR * optSAK);
+extern UCHAR ECL_LV1_GetUID(UCHAR * optLen, UCHAR * optUID);
+extern UCHAR ECL_LV1_HLTA(void);
+extern UCHAR ECL_LV1_InitialCL(void);
+extern UCHAR ECL_LV1_INCREMENT(UCHAR iptAddress, UCHAR * iptValue);
+extern UCHAR ECL_LV1_LOADKEY(UCHAR * iptKey);
+extern UCHAR ECL_LV1_OpenCL(void);
+extern UCHAR ECL_LV1_POLLING(ULONG * iptTimeout, UCHAR iptFormat);
+extern UCHAR ECL_LV1_POLLING_CheckCollision(void);
+extern UCHAR ECL_LV1_POLLING_TypeA(void);
+extern UCHAR ECL_LV1_POLLING_TypeB(void);
+extern UCHAR ECL_LV1_RATS(UINT * rcvLen, UCHAR * rcvATS);
+extern UCHAR ECL_LV1_ResetPCDParameter(void);
+extern UCHAR ECL_LV1_READ(UCHAR iptAddress, UCHAR * optData);
+extern UCHAR ECL_LV1_REMOVAL(ULONG iptTimeout);
+extern UCHAR ECL_LV1_REQA(UINT * rcvLen, UCHAR * rcvATQA);
+extern UCHAR ECL_LV1_RESET(void);
+extern UCHAR ECL_LV1_RESTORE(UCHAR iptAddress);
+extern UCHAR ECL_LV1_SetCardType(UCHAR crdType);
+extern UCHAR ECL_LV1_SetRegister(UCHAR iptRegister, UCHAR iptData);
+extern UCHAR ECL_LV1_SELECT(UCHAR selCL, UCHAR * selUID, UINT * rcvLen, UCHAR * rcvSAK);
+extern UCHAR ECL_LV1_TRANSFER(UCHAR iptAddress);
+extern UCHAR ECL_LV1_WRITE(UCHAR iptAddress, UCHAR * iptData);
+extern UCHAR ECL_LV1_WUPA(UINT * rcvLen, UCHAR * rcvATQA);
+extern UCHAR ECL_LV1_WUPB(UINT * rcvLen, UCHAR * rcvATQB);

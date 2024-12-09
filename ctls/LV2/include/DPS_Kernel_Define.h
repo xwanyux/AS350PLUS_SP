@@ -1,0 +1,181 @@
+#include "ODA_Record.h"
+
+#define DPS_End_APP_Processing_Error	0x31U
+#define DPS_Try_Another					0x33U
+#define	DPS_Select_Next					0x34U
+#define	DPS_Try_Again					0x35U
+#define DPS_IssuerUpdate				0x36U
+
+//Issuer Update
+#define IU_SUCCESS						0x40U
+#define IU_FAIL							0x41U
+#define IU_NotReady						0x42U
+#define IU_OutOfService					0x43U
+
+#define CHARACTER_NUM					64
+
+//----------------------------------------------------------------------------
+//      DPS Record Data (for SFI = 1~30)
+//      FORMAT: ODA[1] DATA[269]
+//                     70-L-V (excluding SW1 SW2)
+//              ODA: bit8 = 1 : record for offline data authen.
+//                   bit6-7   : RFU
+//                   bit1-5   : SFI
+//              L  : length 1~3 bytes.
+//----------------------------------------------------------------------------
+#define DPS_REC_Buf_Size  				ODA_BUFFER_SIZE_RECORD	//30 * 270
+
+#define ADDR_DPS_REC_START              oda_bufRecord
+
+#define MAX_DPS_REC_CNT                 ODA_RECORD_NUMBER	//EMV 42a 20130318
+#define DPS_REC_LEN                     ODA_RECORD_SIZE
+
+#define ADDR_DPS_REC_01                 ADDR_DPS_REC_START+DPS_REC_LEN*0
+#define ADDR_DPS_REC_02                 ADDR_DPS_REC_START+DPS_REC_LEN*1
+#define ADDR_DPS_REC_03                 ADDR_DPS_REC_START+DPS_REC_LEN*2
+#define ADDR_DPS_REC_04                 ADDR_DPS_REC_START+DPS_REC_LEN*3
+#define ADDR_DPS_REC_05                 ADDR_DPS_REC_START+DPS_REC_LEN*4
+#define ADDR_DPS_REC_06                 ADDR_DPS_REC_START+DPS_REC_LEN*5
+#define ADDR_DPS_REC_07                 ADDR_DPS_REC_START+DPS_REC_LEN*6
+#define ADDR_DPS_REC_08                 ADDR_DPS_REC_START+DPS_REC_LEN*7
+#define ADDR_DPS_REC_09                 ADDR_DPS_REC_START+DPS_REC_LEN*8
+#define ADDR_DPS_REC_10                 ADDR_DPS_REC_START+DPS_REC_LEN*9
+
+#define ADDR_DPS_REC_11                 ADDR_DPS_REC_START+DPS_REC_LEN*10
+#define ADDR_DPS_REC_12                 ADDR_DPS_REC_START+DPS_REC_LEN*11
+#define ADDR_DPS_REC_13                 ADDR_DPS_REC_START+DPS_REC_LEN*12
+#define ADDR_DPS_REC_14                 ADDR_DPS_REC_START+DPS_REC_LEN*13
+#define ADDR_DPS_REC_15                 ADDR_DPS_REC_START+DPS_REC_LEN*14
+#define ADDR_DPS_REC_16                 ADDR_DPS_REC_START+DPS_REC_LEN*15
+#define ADDR_DPS_REC_17                 ADDR_DPS_REC_START+DPS_REC_LEN*16
+#define ADDR_DPS_REC_18                 ADDR_DPS_REC_START+DPS_REC_LEN*17
+#define ADDR_DPS_REC_19                 ADDR_DPS_REC_START+DPS_REC_LEN*18
+#define ADDR_DPS_REC_20                 ADDR_DPS_REC_START+DPS_REC_LEN*19
+
+#define ADDR_DPS_REC_21                 ADDR_DPS_REC_START+DPS_REC_LEN*20
+#define ADDR_DPS_REC_22                 ADDR_DPS_REC_START+DPS_REC_LEN*21
+#define ADDR_DPS_REC_23                 ADDR_DPS_REC_START+DPS_REC_LEN*22
+#define ADDR_DPS_REC_24                 ADDR_DPS_REC_START+DPS_REC_LEN*23
+#define ADDR_DPS_REC_25                 ADDR_DPS_REC_START+DPS_REC_LEN*24
+#define ADDR_DPS_REC_26                 ADDR_DPS_REC_START+DPS_REC_LEN*25
+#define ADDR_DPS_REC_27                 ADDR_DPS_REC_START+DPS_REC_LEN*26
+#define ADDR_DPS_REC_28                 ADDR_DPS_REC_START+DPS_REC_LEN*27
+#define ADDR_DPS_REC_29                 ADDR_DPS_REC_START+DPS_REC_LEN*28
+#define ADDR_DPS_REC_30                 ADDR_DPS_REC_START+DPS_REC_LEN*29
+
+#define ADDR_DPS_REC_END                ADDR_DPS_REC_START+DPS_REC_LEN*MAX_DPS_REC_CNT
+
+// 8A - Authorization Response Code
+#define DPS_ARC_APPROVED                0x3030          // "00"
+
+//95 - Terminal Verification Results
+#define DPS_TVR_OFFLINE_DATA_AUTHENTICATION_WAS_NOT_PERFORMED					0x80U
+#define DPS_TVR_SDA_FAILED														0x40U
+#define DPS_TVR_ICC_DATA_MISSING												0x20U
+#define DPS_TVR_CARD_APPEARS_ON_TERMINAL_EXCEPTION_FILE							0x10U
+#define DPS_TVR_DDA_FAILED														0x08U
+#define DPS_TVR_CDA_FAILED														0x04U
+#define DPS_TVR_ICC_AND_TERMINAL_HAVE_DIFFERENT_APPLICATION_VERSIONS			0x80U
+#define DPS_TVR_EXPIRED_APPLICATION												0x40U
+#define DPS_TVR_APPLICATION_NOT_YET_EFFECTIVE									0x20U
+#define DPS_TVR_REQUESTED_SERVICE_NOT_ALLOWED_FOR_CARD_PRODUCT					0x10U
+#define DPS_TVR_NEW_CARD														0x08U
+#define DPS_TVR_CARDHOLDER_VERIFICATION_WAS_NOT_SUCCESSFUL						0x80U
+#define DPS_TVR_UNRECOGNISED_CVM												0x40U
+#define DPS_TVR_PIN_TRY_LIMIT_EXCEEDED											0x20U
+#define DPS_TVR_PIN_ENTRY_REQUIRED_AND_PIN_PAD_NOT_PRESENT_OR_NOT_WORKING		0x10U
+#define DPS_TVR_PIN_ENTRY_REQUIRED_PIN_PAD_PRESENT_BUT_PIN_WAS_NOT_ENTERED		0x08U
+#define DPS_TVR_ONLINE_PIN_ENTERED												0x04U
+#define DPS_TVR_TRANSACTION_EXCEEDS_FLOOR_LIMIT									0x80U
+#define DPS_TVR_LOWER_CONSECUTIVE_OFFLINE_LIMIT_EXCEEDED						0x40U
+#define DPS_TVR_UPPER_CONSECUTIVE_OFFLINE_LIMIT_EXCEEDED						0x20U
+#define DPS_TVR_TRANSACTION_SELECTED_RANDOMLY_FOR_ONLINE_PROCESSING				0x10U
+#define DPS_TVR_MERCHANT_FORCED_TRANSACTION_ONLINE								0x08U
+#define DPS_TVR_DEFAULT_TDOL_USED												0x80U
+#define DPS_TVR_ISSUER_AUTHENTICATION_FAILED									0x40U
+#define DPS_TVR_SCRIPT_PROCESSING_FAILED_BEFORE_FINAL_GENERATE_AC				0x20U
+#define DPS_TVR_SCRIPT_PROCESSING_FAILED_AFTER_FINAL_GENERATE_AC				0x10U
+
+//9B - Transaction Status Information
+#define DPS_TSI_OFFLINE_DATA_AUTHENTICATION_WAS_PERFORMED						0x80U
+#define DPS_TSI_CARDHOLDER_VERIFICATION_WAS_PERFORMED							0x40U
+#define DPS_TSI_CARD_RISK_MANAGEMENT_WAS_PERFORMED								0x20U
+#define DPS_TSI_ISSUER_AUTHENTICATION_WAS_PERFORMED								0x10U
+#define DPS_TSI_TERMINAL_RISK_MANAGEMENT_WAS_PERFORMED							0x08U
+#define DPS_TSI_SCRIPT_PROCESSING_WAS_PERFORMED									0x04U
+
+//9C - Transaction Type
+#define DPS_TXT_Purchase											0x00U
+#define DPS_TXT_Cash												0x01U
+#define DPS_TXT_CashBack											0x09U
+
+//9F07 - Application Usage Control
+#define DPS_AUC_VALID_FOR_DOMESTIC_CASH_TRANSACTIONS								0x80U
+#define DPS_AUC_VALID_FOR_INTERNATIONAL_CASH_TRANSACTIONS							0x40U
+#define DPS_AUC_VALID_FOR_DOMESTIC_GOODS											0x20U
+#define DPS_AUC_VALID_FOR_INTERNATIONAL_GOODS										0x10U
+#define DPS_AUC_VALID_FOR_DOMESTIC_SERVICES											0x08U
+#define DPS_AUC_VALID_FOR_INTERNATIONAL_SERVICES									0x04U
+#define DPS_AUC_VALID_AT_ATMS														0x02U
+#define DPS_AUC_VALID_AT_TERMINALS_OTHER_THAN_ATMS									0x01U
+#define DPS_AUC_DOMESTIC_CASHBACK_ALLOWED											0x80U
+#define DPS_AUC_INTERNATIONAL_CASHBACK_ALLOWED										0x40U
+
+//9F66 - Terminal Transaction Qualifier
+#define DPS_TTQ_MAGNETIC_STRIPE_MODE_SUPPORTED			0x80U
+#define DPS_TTQ_EMV_MODE_SUPPORTED						0x20U
+#define DPS_TTQ_EMV_CONTACT_CHIP_SUPPORTED				0x10U
+#define DPS_TTQ_OFFLINE_ONLY_READER						0x08U
+#define DPS_TTQ_ONLINE_PIN_SUPPORTED					0x04U
+#define DPS_TTQ_SIGNATURE_SUPPORTED						0x02U
+#define DPS_TTQ_ONLINE_CRYPTOGRAM_REQUIRED				0x80U
+#define DPS_TTQ_CVM_REQUIRED							0x40U
+#define DPS_TTQ_CONTACT_CHIP_OFFLINE_PIN_SUPPORTED		0x20U
+#define DPS_TTQ_ISSUER_UPDATE_PROCESSING_SUPPORTED		0x80U
+#define DPS_TTQ_CONSUMER_DEVICE_CVM_SUPPORTED			0x40U
+#define DPS_TTQ_CONSUMER_DEVICE_CVM_REQUIRED			0x08U
+
+//9F71 - Card Processing Requirements
+#define DPS_CPR_ONLINE_PIN_REQUIRED										0x80U
+#define DPS_CPR_SIGNATURE_REQUIRED										0x40U
+#define DPS_CPR_PID_LIMIT_REACHED_LOYALTY_TRANSACTION_APPROVED			0x20U
+#define DPS_CPR_CONSUMER_DEVICE_CVM_PERFORMED							0x10U
+#define DPS_CPR_SWITCH_OTHER_INTERFACE_IF_UNABLE_TO_PROCESS_ONLINE		0x80U
+#define	DPS_CPR_PROCESS_ONLINE_IF_CDA_FAILED							0x40U
+#define DPS_CPR_DECLINE_SWITCH_OTHER_INTERFACE_IF_CDA_FAILED			0x20U
+#define DPS_CPR_ISSUER_UPDATE_PROCESSING_SUPPORTED						0x10U
+#define DPS_CPR_PROCESS_ONLINE_IF_CARD_EXPIRED							0x08U
+#define DPS_CPR_DECLINE_IF_CARD_EXPIRED									0x04U
+#define DPS_CPR_CVM_FALLBACK_TO_SIGNATURE_ALLOWED						0x02U
+#define DPS_CPR_CVM_FALLBACK_TO_NO_CVM_ALLOWED							0x01U
+
+//D-PAS State Response Code
+#define DPS_FIGURE_RETURN			0x00U
+#define DPS_FIGURE_1				0x01U
+#define DPS_FIGURE_2				0x02U
+#define DPS_FIGURE_3				0x03U
+#define DPS_FIGURE_4				0x04U
+#define DPS_FIGURE_5				0x05U
+#define DPS_FIGURE_6				0x06U
+#define DPS_FIGURE_7				0x07U
+#define DPS_FIGURE_8				0x08U
+#define DPS_FIGURE_9				0x09U
+#define DPS_FIGURE_10				0x0AU
+#define DPS_FIGURE_11				0x0BU
+#define DPS_FIGURE_12				0x0CU
+#define DPS_FIGURE_13				0x0DU
+#define DPS_FIGURE_14				0x0EU
+#define DPS_FIGURE_15				0x0FU
+#define DPS_FIGURE_16				0x10U
+#define DPS_FIGURE_17				0x11U
+#define DPS_FIGURE_18				0x12U
+#define DPS_FIGURE_19				0x13U
+#define DPS_FIGURE_20				0x14U
+#define DPS_FIGURE_21				0x15U
+#define DPS_FIGURE_22				0x16U
+#define DPS_FIGURE_23				0x17U
+#define DPS_FIGURE_24				0x18U
+#define DPS_FIGURE_25				0x19U
+#define DPS_FIGURE_26				0x1AU
+#define DPS_FIGURE_27				0x1BU
+#define DPS_FIGURE_EXITKERNEL		0xFFU

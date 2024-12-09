@@ -1,0 +1,13 @@
+PEDK REVISON HISTORY
+======================
+
+V1.00	2018/05/23
+	1'st release version for AS330.
+
+V1.00a	2018/06/07
+	1. Support USB2UART.
+	
+	2018/05/29
+	1. Expand "AUX_MAX_RXBUF_SIZE" from 512 bytes (AUX_DEFAULT_BUF_SIZE) to 1024+32 bytes (AUX_DEFAULT_RING_BUF_SIZE).
+	2. Direct malloc() & free() to FreeRTOS heap_4 for APP layer usage. (<50KB)
+	   BSP_Malloc() & BSP_Free() are used on BSP layer. (<16KB)

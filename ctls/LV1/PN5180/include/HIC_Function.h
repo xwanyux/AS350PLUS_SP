@@ -1,0 +1,18 @@
+extern UCHAR HIC_Transmit_SPI(ULONG datLen, UCHAR *datBuffer);
+extern UCHAR HIC_LOAD_RF_CONFIG(UCHAR iptConTX, UCHAR iptConRX);
+extern UCHAR HIC_MIFARE_AUTHENTICATE(UCHAR * iptKey, UCHAR iptAutType, UCHAR iptBlkAddress, UCHAR * iptUID, UCHAR * optStatus);
+extern UCHAR HIC_READ_DATA(UINT iptLen, UCHAR *optData);
+extern UCHAR HIC_READ_EEPROM(UCHAR iptAddEEPROM, UINT iptLen, UCHAR *optData);
+extern UCHAR HIC_READ_REGISTER(UCHAR iptAddRegister, UCHAR *optData);
+extern UCHAR HIC_READ_REGISTER_MULTIPLE(UINT iptLen, UCHAR *iptData, UINT *optLen, UCHAR *optData);
+extern UCHAR HIC_RF_ON(void);
+extern UCHAR HIC_RF_OFF(void);
+extern UCHAR HIC_SEND_DATA(UINT iptLen, UCHAR *iptData);
+extern UCHAR HIC_SEND_DATA_BIT_ORIENTED(UINT iptLen, UCHAR *iptData, UCHAR iptBitsValid);
+extern UCHAR HIC_UPDATE_RF_CONFIG(UINT iptLen, UCHAR *iptData);
+extern UCHAR HIC_WRITE_EEPROM(UCHAR iptAddEEPROM, UINT iptLen, UCHAR *iptData);
+extern UCHAR HIC_WRITE_REGISTER(UCHAR iptAddRegister, UCHAR *iptData);
+extern UCHAR HIC_WRITE_REGISTER_OR_MASK(UCHAR iptAddRegister, UCHAR *iptData);
+extern UCHAR HIC_WRITE_REGISTER_AND_MASK(UCHAR iptAddRegister, UCHAR *iptData);
+extern UCHAR HIC_WRITE_REGISTER_MULTIPLE(UINT iptLen, UCHAR *iptData);
+extern UCHAR HIC_WRITE_TX_DATA(UINT iptLen, UCHAR *iptData);

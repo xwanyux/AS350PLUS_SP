@@ -1,0 +1,59 @@
+
+//	NXP Register Buffer Size
+#define NXP_REGISTER_BUFFER				8
+#define NXP_SERIAL_RW_BUFFER			512
+
+//	IRQ
+#define NXP_IRQ0_SET					0x80U
+#define NXP_IRQ0_HI_ALERT				0x40U
+#define NXP_IRQ0_LO_ALERT				0x20U
+#define NXP_IRQ0_IDLE					0x10U
+#define NXP_IRQ0_TX						0x08U
+#define NXP_IRQ0_RX						0x04U
+#define NXP_IRQ0_ERR					0x02U
+#define NXP_IRQ0_RX_SOF					0x01U
+#define NXP_IRQ0_DISABLE				0x00U
+#define NXP_IRQ1_SET					0x80U
+#define NXP_IRQ1_GLOBAL					0x40U
+#define NXP_IRQ1_LPCD					0x20U
+#define NXP_IRQ1_TIMER4					0x10U
+#define NXP_IRQ1_TIMER3					0x08U
+#define NXP_IRQ1_TIMER2					0x04U
+#define NXP_IRQ1_TIMER1					0x02U
+#define NXP_IRQ1_TIMER0					0x01U
+#define NXP_IRQ1_DISABLE				0x00U
+
+//	Error
+#define NXP_ERROR_IntegErr				0x01U
+#define NXP_ERROR_ProtErr				0x02U
+#define NXP_ERROR_CollDet				0x04U
+
+//	Noise Parameter
+#define NXP_NOISE_PARAMETER_BUFFER		6
+
+#define NXP_NOISE_PARAMETER_IRQ0		0
+#define NXP_NOISE_PARAMETER_IRQ1		1
+#define NXP_NOISE_PARAMETER_LENGTH		2
+#define NXP_NOISE_PARAMETER_ERROR		3
+#define NXP_NOISE_PARAMETER_TIMER_HI	4
+#define NXP_NOISE_PARAMETER_TIMER_LO	5
+
+
+//	Timer (10ms)
+#define NXP_TIMER_EXCEPTION_ERROR		1000
+#define NXP_TIMER_GLOBAL_IRQ			1000
+
+//	Processing Time (1/fc)
+#define NXP_PROCESSING_TIME_A_SEND		200
+#define NXP_PROCESSING_TIME_A_RECEIVE	660
+#define NXP_PROCESSING_TIME_A			(NXP_PROCESSING_TIME_A_SEND+NXP_PROCESSING_TIME_A_RECEIVE)
+#define NXP_PROCESSING_TIME_B			2560
+
+//	RX Wait Time (1/fc)
+#define NXP_RX_WAIT_TIME				1056
+
+//	NXP MIFARE Classic Timeout (1/fc)
+#define NXP_MIFARE_TIMEOUT_1MS			13560
+#define NXP_MIFARE_TIMEOUT_5MS			67800
+#define NXP_MIFARE_TIMEOUT_10MS			135600
+

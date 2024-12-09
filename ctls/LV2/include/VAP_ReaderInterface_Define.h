@@ -1,0 +1,207 @@
+//VISA AP Supprot SchemeID
+#define VAP_Scheme_MSI				0x10	//MSI
+#define VAP_Scheme_DDAMSI			0x11	//DDA+MSI
+#define VAP_Scheme_CDA 				0x12	//CDA
+#define VAP_Scheme_dCvv				0x13	//dCVV
+#define VAP_Scheme_FullVSDC 		0x14	//Full VSDC
+#define VAP_Scheme_FastDDAVLP		0x15	//Fast DDA + VLP
+#define VAP_Scheme_Wave2			0x16	//WAVE2
+#define VAP_Scheme_Wave3			0x17	//WAVE3, qVSDC
+#define VAP_Scheme_MSD20			0x18	//MSD2.0
+#define VAP_Scheme_PP_Magstripe		0x20	//PP Magstripe
+#define VAP_Scheme_PP_MChip			0x21	//PP MChip
+#define VAP_Scheme_AE_Magstripe		0x40	//AE Magstripe
+#define VAP_Scheme_AE_EMV			0x41	//AE EMV
+#define VAP_Scheme_JCBWave1			0x60	//JCB Wave1
+#define VAP_Scheme_JCBWave2			0x61	//JCB Wave2
+#define VAP_Scheme_JCBWave3			0x62	//JCB Wave3, qVSDC
+#define VAP_Scheme_JCBMag			0x63	//JCB Magstripe
+#define VAP_Scheme_DPAS_Magstripe	0x70	//DPAS Magstripe
+#define VAP_Scheme_DPAS_EMV			0x71	//DPAS EMV
+#define VAP_Scheme_ZIP				0x72	//ZIP
+#define VAP_Scheme_JCBMag			0x63	//JCB Magstripe
+#define VAP_Scheme_qVBOC			0x80	//qVBOC
+#define VAP_Scheme_qVBOCMSD			0x81	//qVBOC MSD
+#define VAP_Scheme_qUICS			0x91	//qUICS
+
+//	VISA L3 Parameter Index
+#define VAP_RIF_PARAMETER_INDEX_P_MSG_TIMEOUT		0x0001U
+#define VAP_RIF_PARAMETER_INDEX_P_SALE_TIMEOUT		0x0002U
+#define VAP_RIF_PARAMETER_INDEX_P_POLL_MSG			0x0003U
+#define VAP_RIF_PARAMETER_INDEX_P_BUF_TIMEOUT		0x0004U
+#define VAP_RIF_PARAMETER_INDEX_P_ENCRYPTION		0x0005U
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY			0x0006U
+#define VAP_RIF_PARAMETER_INDEX_P_MAX_BUF_SIZE		0x0007U
+#define VAP_RIF_PARAMETER_INDEX_P_DOUBLE_DIP		0x0008U
+#define VAP_RIF_PARAMETER_INDEX_P_READER_INDEX		0x0009U
+#define VAP_RIF_PARAMETER_INDEX_P_LAUGUAGE			0x000AU
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY_S_MSG		0x000BU
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY_L_MSG		0x000CU
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY_SS_MSG	0x000DU
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY_SR_MSG	0x000EU
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY_PIN_MSG	0x000FU
+#define VAP_RIF_PARAMETER_INDEX_P_DISPLAY_E_MSG		0x0010U
+
+#ifdef _PLATFORM_AS350_LITE
+#define VAP_RIF_BUFFER_SIZE		(10*1024 + 64)
+#else
+#define VAP_RIF_BUFFER_SIZE		4096
+#endif
+
+#define VAP_RIF_KEY_NUMBER		8
+#define VAP_RIF_AUTHKEY_NUMBER	6
+
+#define VAP_RIF_INDEX_SENDER	0x0BU
+#define VAP_RIF_INDEX_RECEIVER	0x0EU
+
+#define VAP_CAPK_ID_VISA		0
+#define VAP_CAPK_ID_MASTER		1
+#define VAP_CAPK_ID_JCB			2
+#define VAP_CAPK_ID_VISA_TEST	3
+#define VAP_CAPK_ID_MASTER_TEST	4
+#define VAP_CAPK_ID_UPI			5
+#define VAP_CAPK_ID_AE			6
+#define VAP_CAPK_ID_DISCOVER	7
+
+#define VAP_RIF_INSTRUCTION_POL_POLL							0x07U
+#define VAP_RIF_INSTRUCTION_POL_Echo							0x08U
+#define VAP_RIF_INSTRUCTION_DEB_SetDebugAndOptimizationMode		0x10U
+#define VAP_RIF_INSTRUCTION_DEB_RFU								0x11U
+#define VAP_RIF_INSTRUCTION_DEB_SetParameters					0x12U
+#define VAP_RIF_INSTRUCTION_AUT_InitializeCommunication			0x20U
+#define VAP_RIF_INSTRUCTION_AUT_MutualAuthenticate				0x21U
+#define VAP_RIF_INSTRUCTION_AUT_GenerateKey						0x22U
+#define VAP_RIF_INSTRUCTION_AUT_InvalidateReader				0x23U
+#define VAP_RIF_INSTRUCTION_TRA_ReadyForSalesTransaction		0x30U
+#define VAP_RIF_INSTRUCTION_TRA_Reset							0x31U
+#define VAP_RIF_INSTRUCTION_TRA_ShowStatus						0x32U
+#define VAP_RIF_INSTRUCTION_TRA_Issuer_Update					0x33U
+#define VAP_RIF_INSTRUCTION_ADM_SwitchToAdministrativeMode		0x40U
+#define VAP_RIF_INSTRUCTION_ADM_GetCapability					0x41U
+#define VAP_RIF_INSTRUCTION_ADM_SetCapability					0x42U
+#define VAP_RIF_INSTRUCTION_ADM_GetDateAndTime					0x43U
+#define VAP_RIF_INSTRUCTION_ADM_SetDateAndTime					0x44U
+#define VAP_RIF_INSTRUCTION_ADM_GetParameters					0x45U
+#define VAP_RIF_INSTRUCTION_ADM_GetVisaPublicKey				0x50U
+#define VAP_RIF_INSTRUCTION_ADM_SetVisaPublicKey				0x51U
+#define VAP_RIF_INSTRUCTION_ADM_GetBaudRate						0x52U
+#define VAP_RIF_INSTRUCTION_ADM_SetBaudRate						0x53U
+#define VAP_RIF_INSTRUCTION_ADM_ResetAcquirerKey				0x54U
+#define VAP_RIF_INSTRUCTION_ADM_ReaderRecovery					0x55U
+#define VAP_RIF_INSTRUCTION_ADM_GetEMVTagsValues				0x56U
+#define VAP_RIF_INSTRUCTION_ADM_SetEMVTagsValues				0x57U
+#define VAP_RIF_INSTRUCTION_ADM_GetDisplayMessages				0x58U
+#define VAP_RIF_INSTRUCTION_ADM_SetDisplayMessages				0x59U
+#define VAP_RIF_INSTRUCTION_ADM_GetCVMCapability				0x5AU
+#define VAP_RIF_INSTRUCTION_ADM_SetCVMCapability				0x5BU
+#define VAP_RIF_INSTRUCTION_ADM_GetAPID							0x5CU
+#define VAP_RIF_INSTRUCTION_ADM_SetAPID							0x5DU
+#define VAP_RIF_INSTRUCTION_ADM_GetExceptionFile				0x5EU
+#define VAP_RIF_INSTRUCTION_ADM_SetExceptionFile				0x5FU
+#define VAP_RIF_INSTRUCTION_ADM_GetKeyRevoList					0x60U
+#define VAP_RIF_INSTRUCTION_ADM_SetKeyRevoList					0x61U
+#define VAP_RIF_INSTRUCTION_ADM_GetDRLEnable					0x68U
+#define VAP_RIF_INSTRUCTION_ADM_SetDRLEnable					0x69U
+#define VAP_RIF_INSTRUCTION_ADM_GetCashRRP						0x6AU
+#define VAP_RIF_INSTRUCTION_ADM_SetCashRRP						0x6BU
+#define VAP_RIF_INSTRUCTION_ADM_GetCashBackRRP					0x6CU
+#define VAP_RIF_INSTRUCTION_ADM_SetCashBackRRP					0x6DU
+#define VAP_RIF_INSTRUCTION_PRO_KeyInjection					0x71U
+#define VAP_RIF_INSTRUCTION_ADM_GetVisaTestAIDPublicKey			0x72U
+#define VAP_RIF_INSTRUCTION_ADM_SetVisaTestAIDPublicKey			0x73U
+#define VAP_RIF_INSTRUCTION_PRO_SetDRL							0x74U
+#define VAP_RIF_INSTRUCTION_PRO_SetVLPSupportIndicator			0x77U
+#define VAP_RIF_INSTRUCTION_PRO_GetVLPSupportIndicator			0x78U
+#define VAP_RIF_INSTRUCTION_PRO_GetEMVTags						0x79U
+#define VAP_RIF_INSTRUCTION_ADM_SetMSDOption					0x7DU
+#define VAP_RIF_INSTRUCTION_ADM_GetMSDOption					0x7EU
+#define VAP_RIF_INSTRUCTION_ADM_GetMasterPublicKey				0x80U
+#define VAP_RIF_INSTRUCTION_ADM_SetMasterPublicKey				0x81U
+#define VAP_RIF_INSTRUCTION_ADM_GetPayPassConfigurationData		0x90U
+#define VAP_RIF_INSTRUCTION_ADM_SetPayPassConfigurationData		0x91U
+#define VAP_RIF_INSTRUCTION_ADM_GetPayPassDataExchangeData		0x92U
+#define VAP_RIF_INSTRUCTION_ADM_SetPayPassDataExchangeData		0x93U
+#define VAP_RIF_INSTRUCTION_ADM_GetExpressPayDefaultDRL			0xA0U
+#define VAP_RIF_INSTRUCTION_ADM_SetExpressPayDefaultDRL			0xA1U
+#define VAP_RIF_INSTRUCTION_ADM_GetExpressPayDRL				0xA2U
+#define VAP_RIF_INSTRUCTION_ADM_SetExpressPayDRL				0xA3U
+#define VAP_RIF_INSTRUCTION_ADM_GetExpressPayKeyRevoList		0xA4U
+#define VAP_RIF_INSTRUCTION_ADM_SetExpressPayKeyRevoList		0xA5U
+#define VAP_RIF_INSTRUCTION_ADM_GetExpressPayExceptionFile		0xA6U
+#define VAP_RIF_INSTRUCTION_ADM_SetExpressPayExceptionFile		0xA7U
+#define VAP_RIF_INSTRUCTION_ADM_GetAEPublicKey					0xA8U
+#define VAP_RIF_INSTRUCTION_ADM_SetAEPublicKey					0xA9U
+#define VAP_RIF_INSTRUCTION_ADM_GetQuickPassMultipleAIDData		0xB0U
+#define VAP_RIF_INSTRUCTION_ADM_SetQuickPassMultipleAIDData		0xB1U
+#define VAP_RIF_INSTRUCTION_ADM_GetQuickPassMultipleAIDEnable	0xB2U
+#define VAP_RIF_INSTRUCTION_ADM_SetQuickPassMultipleAIDEnable	0xB3U
+#define VAP_RIF_INSTRUCTION_ADM_GetUPIPublicKey					0xB4U
+#define VAP_RIF_INSTRUCTION_ADM_SetUPIPublicKey					0xB5U
+#define VAP_RIF_INSTRUCTION_ADM_GetJCBPublicKey					0xC0U
+#define VAP_RIF_INSTRUCTION_ADM_SetJCBPublicKey					0xC1U
+#define VAP_RIF_INSTRUCTION_ADM_GetDiscoverPublicKey			0xD0U
+#define VAP_RIF_INSTRUCTION_ADM_SetDiscoverPublicKey			0xD1U
+#define VAP_RIF_INSTRUCTION_SYS_SetReadyForSaleBeep				0xF0U
+#define VAP_RIF_INSTRUCTION_SYS_SetRFRangeUnder4cm				0xF1U
+#define VAP_RIF_INSTRUCTION_SYS_SetRFRangeEMV					0xF2U
+#define VAP_RIF_INSTRUCTION_SYS_SetJCBRefundResponse			0xF3U
+
+
+#define VAP_RIF_RC_SUCCESS				0x00U
+#define VAP_RIF_RC_DATA					0x01U
+#define VAP_RIF_RC_POLL_A				0x02U
+#define VAP_RIF_RC_POLL_P				0x03U
+#define VAP_RIF_RC_SCHEME_SUPPORTED		0x04U
+#define VAP_RIF_RC_SIGNATURE			0x05U
+#define VAP_RIF_RC_ONLINE_PIN			0x06U
+#define VAP_RIF_RC_OFFLINE_PIN			0x07U
+#define VAP_RIF_RC_SECOND_APPLICATION	0x08U
+#define VAP_RIF_RC_KEY_PAD				0xE0U
+#define VAP_RIF_RC_INSERT				0xE1U
+#define VAP_RIF_RC_SWIPE				0xE2U
+#define VAP_RIF_RC_TRY_AGAIN			0xE3U	//add for consumer payment devices
+#define VAP_RIF_RC_JCB_REFUND_DECLINE	0xE4U
+#define VAP_RIF_RC_AUX_INTERRUPTION		0xE5U
+#define VAP_RIF_RC_OTHER_INTERFACE		0xE9U
+#define VAP_RIF_RC_INVALID_JCB_CA_KEY	0xEAU
+#define VAP_RIF_RC_NO_SIG				0xEBU
+#define VAP_RIF_RC_NO_PIN				0xECU
+#define VAP_RIF_RC_US_CARDS				0xEDU
+#define VAP_RIF_RC_OTHER_AP_CARDS		0xEEU
+#define VAP_RIF_RC_POLL_N				0xEFU
+#define VAP_RIF_RC_NO_PARAMETER			0xF0U
+#define VAP_RIF_RC_NO_EMV_TAGS			0xF1U
+#define VAP_RIF_RC_NO_CARD				0xF2U
+#define VAP_RIF_RC_MORE_CARDS			0xF3U
+#define VAP_RIF_RC_INVALID_VISA_CA_KEY	0xF4U
+#define VAP_RIF_RC_INVALID_SCHEME		0xF5U
+#define VAP_RIF_RC_INVALID_KEYINDEX		0xF6U
+#define VAP_RIF_RC_INVALID_PARA			0xF7U
+#define VAP_RIF_RC_INVALID_DATA			0xF8U
+#define VAP_RIF_RC_INVALID_COMMAND		0xF9U
+#define VAP_RIF_RC_DDA_AUTH_FAILURE		0xFAU
+#define VAP_RIF_RC_AUTH_NOT_PERFORMED	0xFBU
+#define VAP_RIF_RC_AUTH_FAILURE			0xFCU
+#define VAP_RIF_RC_ACCESS_FAILURE		0xFDU
+#define VAP_RIF_RC_ACCESS_NOT_PERFORMED	0xFEU
+#define VAP_RIF_RC_FAILURE				0xFFU
+
+
+
+extern	UCHAR	VAP_Reset_Command_Occured;
+extern	UINT	VAP_VISA_P_MSG_TIMEOUT;
+extern	UINT	VAP_VISA_P_SALE_TIMEOUT;
+extern	ULONG	VAP_VISA_P_POLL_MSG;
+extern	UINT	VAP_VISA_P_BUF_TIMEOUT;
+extern	UCHAR	VAP_VISA_P_ENCRYPTION;
+extern	UCHAR	VAP_VISA_P_DISPLAY;
+extern	UINT	VAP_VISA_P_MAX_BUF_SIZE;
+extern	UINT	VAP_VISA_P_DOUBLE_DIP;
+extern	UINT	VAP_VISA_P_READER_INDEX;
+extern	UCHAR	VAP_VISA_P_LAUGUAGE[16];
+extern	UINT	VAP_VISA_P_DISPLAY_S_MSG;
+extern	UINT	VAP_VISA_P_DISPLAY_L_MSG;
+extern	UINT	VAP_VISA_P_DISPLAY_SS_MSG;
+extern	UINT	VAP_VISA_P_DISPLAY_SR_MSG;
+extern	UINT	VAP_VISA_P_DISPLAY_PIN_MSG;
+extern	UINT	VAP_VISA_P_DISPLAY_E_MSG;

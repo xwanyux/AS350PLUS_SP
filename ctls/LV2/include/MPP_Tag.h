@@ -1,0 +1,30 @@
+extern unsigned char *mpp_bufActiveAFL;
+extern unsigned char *mpp_bufActiveTag;
+extern unsigned char *mpp_bufACType;
+extern unsigned char *mpp_bufFailedMSCntr;
+extern unsigned char *mpp_bufNextCmd;
+extern unsigned char *mpp_bufnUN;
+extern unsigned char *mpp_bufODAStatus;
+extern unsigned char *mpp_bufReaderContactlessTransactionLimit;
+extern unsigned char *mpp_bufStaticDataToBeAuthenticated;
+extern unsigned char *mpp_bufTagsToReadYet;
+extern unsigned char *mpp_bufTagsToWriteYetAfterGenAC;
+extern unsigned char *mpp_bufTagsToWriteYetBeforeGenAC;
+extern unsigned char *mpp_bufTornEntry;
+extern unsigned char *mpp_bufTornTempRecord;
+
+extern ECL_TAG mpp_tagActiveAFL;
+extern ECL_TAG mpp_tagActiveTag;
+extern ECL_TAG mpp_tagACType;
+extern ECL_TAG mpp_tagFailedMSCntr;
+extern ECL_TAG mpp_tagNextCmd;
+extern ECL_TAG mpp_tagnUN;
+extern ECL_TAG mpp_tagODAStatus;
+extern ECL_TAG mpp_tagReaderContactlessTransactionLimit;
+extern ECL_TAG mpp_tagStaticDataToBeAuthenticated;
+extern ECL_TAG mpp_tagTagsToReadYet;
+extern ECL_TAG mpp_tagTagsToWriteYetAfterGenAC;
+extern ECL_TAG mpp_tagTagsToWriteYetBeforeGenAC;
+extern ECL_TAG mpp_tagTornEntry;
+extern ECL_TAG mpp_tagTornTempRecord;
+

@@ -31,18 +31,25 @@
 #include "POSAPI.h"
 #include "DEV_AUX.h"
 #include <stdio.h>
-UINT		os_DHN_AUX0 = 0;
-UINT		os_DHN_AUX1 = 0;
-UINT		os_DHN_AUX2 = 0;
+UCHAR		os_DHN_AUX0 = 0;
+UCHAR		os_DHN_AUX1 = 0;
+UCHAR		os_DHN_AUX2 = 0;
+UCHAR		os_DHN_AUX3 = 0;
+int		os_DHN_AUX0_FD = 0;
+int		os_DHN_AUX1_FD = 0;
+int		os_DHN_AUX2_FD = 0;
+int		os_DHN_AUX3_FD = 0;
 BSP_UART	*os_pAUX0;
 BSP_UART	*os_pAUX1;
 BSP_UART	*os_pAUX2;
+BSP_UART	*os_pAUX3;
 
 UINT32		os_SOH_LEN_TYPE = 0;			// 0=2-byte, 1=4-byte
 UINT32		os_DLL_ACK_MODE = 0;			// 0=real-time, 1=after-service
 UCHAR		IfOpenedCom0=0;//to note whether uart port opened.	
 UCHAR		IfOpenedCom1=0;	
-UCHAR		IfOpenedCom2=0;	
+UCHAR		IfOpenedCom2=0;
+UCHAR		IfOpenedCom3=0;	
 extern	API_AUX		os_AUX_Para[];
 extern	UINT32		os_AUX_State[];
 // ---------------------------------------------------------------------------
@@ -52,9 +59,9 @@ extern	UINT32		os_AUX_State[];
 // RETURN  : pUart   -- pointer to BSP_UART structure.
 //	     NULLPTR -- invalid device.
 // ---------------------------------------------------------------------------
-BSP_UART *AUX_CheckDHN( UINT dhn )
+BSP_UART *AUX_CheckDHN( UCHAR dhn )
 {	      
-		if		( (dhn == os_DHN_AUX0)&&IfOpenedCom0 )
+		if ( (dhn == os_DHN_AUX0)&&IfOpenedCom0 )
 			return( os_pAUX0 );
     
 		else if	( (dhn == os_DHN_AUX1)&&IfOpenedCom1 )
@@ -62,6 +69,9 @@ BSP_UART *AUX_CheckDHN( UINT dhn )
        	      
 		else if	( (dhn == os_DHN_AUX2)&&IfOpenedCom2 )
 			return( os_pAUX2 );
+			
+		else if	( (dhn == os_DHN_AUX3)&&IfOpenedCom3 )
+			return( os_pAUX3 );
 		else
 			return( NULLPTR );
 	   
@@ -81,7 +91,7 @@ BSP_UART *AUX_GetDHN( ULONG port )
 	      {
 	      case BSP_UART_0:
 	      
-	           if( os_DHN_AUX0>0 )
+	           if( os_DHN_AUX0_FD>0 )
 	             return( os_pAUX0 );
 	           else
 	             return( NULLPTR );
@@ -90,7 +100,7 @@ BSP_UART *AUX_GetDHN( ULONG port )
 	           
 	      case BSP_UART_1:
 	      
-	          if( os_DHN_AUX1>0 )
+	          if( os_DHN_AUX1_FD>0 )
 	             return( os_pAUX1 );
 	           else
 	             return( NULLPTR );
@@ -99,8 +109,17 @@ BSP_UART *AUX_GetDHN( ULONG port )
 	           
 	      case BSP_UART_2:
 	      
-	           if( os_DHN_AUX2>0 )
+	           if( os_DHN_AUX2_FD>0 )
 	             return( os_pAUX2 );
+	           else
+	             return( NULLPTR );
+	             
+	           break;
+
+	      case BSP_UART_3:
+	      
+	           if( os_DHN_AUX3_FD>0 )
+	             return( os_pAUX3 );
 	           else
 	             return( NULLPTR );
 	             
@@ -135,7 +154,7 @@ UINT	dhn;
 // API_AUX	pAux;
 	
 	// memmove( &pAux, sbuf, sizeof(API_AUX) );
-	//dhn = port + psDEV_AUX + 0x80;
+	dhn = port + psDEV_AUX + 0x80;
 	//if(COM1)
 	// 2015-04-27, force to close COM port for AS350S4 app
 	switch( port )
@@ -151,10 +170,17 @@ UINT	dhn;
 	      	   if( IfOpenedCom1 != 0 )
 	      	     api_aux_close( os_DHN_AUX1 );
 	           break; 
-		  case COM2:
+	         
+	      case COM2:
 
 	      	   if( IfOpenedCom2 != 0 )
 	      	     api_aux_close( os_DHN_AUX2 );
+	           break; 
+
+	      case COM3:
+
+	      	   if( IfOpenedCom3 != 0 )
+	      	     api_aux_close( os_DHN_AUX3 );
 	           break; 
 	      }
 	switch( port )
@@ -165,14 +191,18 @@ UINT	dhn;
 	      	     return( apiOutOfService );
 	      	   else
 	      	     {
-	      	     
+	      	     os_DHN_AUX0 = dhn;
 	      	     os_pAUX0 = OS_AUX_Open( port, pAux );
 	      	     if( os_pAUX0 == NULLPTR )
 	      	       return( apiOutOfService );
 	      	     }
 				 printf("COM0 open\n");
+#if	0
 				 dhn=os_pAUX0->Fd;
 				 os_DHN_AUX0 = dhn;
+#else
+				 os_DHN_AUX0_FD = os_pAUX0->Fd;
+#endif
 				 IfOpenedCom0=1;
 				printf("COM0 dhn:%d\n",dhn);
 	      	   break;
@@ -182,14 +212,19 @@ UINT	dhn;
 	      	   if( IfOpenedCom1 != 0 )
 	      	     return( apiOutOfService );
 	      	   else
-	      	     {	      	     
+	      	     {
+	      	     os_DHN_AUX1 = dhn;
 	      	     os_pAUX1 = OS_AUX_Open( port, pAux );
 	      	     if( os_pAUX1 == NULLPTR )
 	      	       return( apiOutOfService );
 	      	     }
 				 printf("COM1 open\n");
+#if	0
 				 dhn=os_pAUX1->Fd;				 
 				 os_DHN_AUX1 = dhn;
+#else
+				 os_DHN_AUX1_FD = os_pAUX1->Fd;
+#endif
 				 IfOpenedCom1=1;
 				 printf("COM1 dhn:%d\n",dhn);
 
@@ -200,17 +235,45 @@ UINT	dhn;
 	      	   if( IfOpenedCom2 != 0 )
 	      	     return( apiOutOfService );
 	      	   else
-	      	     {	      	     
+	      	     {
+	      	     os_DHN_AUX2 = dhn;
 	      	     os_pAUX2 = OS_AUX_Open( port, pAux );
 	      	     if( os_pAUX2 == NULLPTR )
 	      	       return( apiOutOfService );
 	      	     }
 				printf("COM2 open\n");
+#if	0
 				 dhn=os_pAUX2->Fd;				 
 				 os_DHN_AUX2 = dhn;
+#else
+				 os_DHN_AUX2_FD = os_pAUX2->Fd;
+#endif
 				 IfOpenedCom2=1;
 				 printf("COM2 dhn:%d\n",dhn);
 	      	   break;
+
+		  case COM3:
+	      
+	      	   if( IfOpenedCom3 != 0 )
+	      	     return( apiOutOfService );
+	      	   else
+	      	     {
+	      	     os_DHN_AUX3 = dhn;
+	      	     os_pAUX3 = OS_AUX_Open( port, pAux );
+	      	     if( os_pAUX3 == NULLPTR )
+	      	       return( apiOutOfService );
+	      	     }
+				printf("COM3 open\n");
+#if	0
+				 dhn=os_pAUX3->Fd;				 
+				 os_DHN_AUX3 = dhn;
+#else
+				 os_DHN_AUX3_FD = os_pAUX3->Fd;
+#endif
+				 IfOpenedCom3=1;
+				 printf("COM3 dhn:%d\n",dhn);
+	      	   break;
+
 	      default:
 	           return( apiOutOfService );
 	      }
@@ -243,14 +306,25 @@ BSP_UART *pUart=NULL;
 		result=OS_AUX_Close( pUart );	
 		if(result)
 		{
-			if(os_DHN_AUX0 == pUart->Fd){
-				IfOpenedCom0 = 0;		
+			if(os_DHN_AUX0_FD == pUart->Fd){
+				IfOpenedCom0 = 0;
+				os_DHN_AUX0 = 0;
+				os_DHN_AUX0_FD = 0;
 			}
-			else if(os_DHN_AUX1 == pUart->Fd){
+			else if(os_DHN_AUX1_FD == pUart->Fd){
 				IfOpenedCom1 = 0;
+				os_DHN_AUX1 = 0;
+				os_DHN_AUX1_FD = 0;
 			}
-			else if(os_DHN_AUX2 == pUart->Fd){
+			else if(os_DHN_AUX2_FD == pUart->Fd){
 				IfOpenedCom2 = 0;
+				os_DHN_AUX2 = 0;
+				os_DHN_AUX2_FD = 0;
+			}
+			else if(os_DHN_AUX3_FD == pUart->Fd){
+				IfOpenedCom3 = 0;
+				os_DHN_AUX3 = 0;
+				os_DHN_AUX3_FD = 0;
 			}
 			
 			os_SOH_LEN_TYPE = 0;
@@ -492,7 +566,7 @@ BSP_UART *pUart;
 // RETURN  : apiOK
 //           apiFailed
 // ---------------------------------------------------------------------------
-UCHAR 	api_aux_SetLongLen( UINT dhn, UCHAR flag )
+UCHAR 	api_aux_SetLongLen( UCHAR dhn, UCHAR flag )
 {
 BSP_UART *pUart;
 
@@ -521,7 +595,7 @@ BSP_UART *pUart;
 // RETURN  : apiOK
 //           apiFailed
 // ---------------------------------------------------------------------------
-UCHAR 	api_aux_SetAckMode( UINT dhn, UCHAR mode )
+UCHAR 	api_aux_SetAckMode( UCHAR dhn, UCHAR mode )
 {
 BSP_UART *pUart;
 

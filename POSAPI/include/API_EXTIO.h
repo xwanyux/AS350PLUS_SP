@@ -17,67 +17,70 @@ UCHAR EXTIO_GPIO_Read(UCHAR BANK_ADDR, UCHAR GPIO_PORT, UCHAR GPIO_NUM, UCHAR *v
 extern UCHAR EXTIO_IOINIT();
 
 // this define is follow the Extention I/O circuit pin name
+// U4 (addr = 002), all input pins
+// U5 (addr = 000), all output pins
+// U6 (addr = 001), all output pins
 
 // (ADDR, Port) = (010, 0)
-#define _PAPEREND_BANK_ADDR     0x010
+#define _PAPEREND_BANK_ADDR     0x002	// 0x010
 #define _PAPEREND_GPIO_PORT     0x0
 #define _PAPEREND_GPIO_NUM      0x0
 
-#define _BAT_ST_IN_BANK_ADDR    0x010
+#define _BAT_ST_IN_BANK_ADDR    0x002	// 0x010
 #define _BAT_ST_IN_GPIO_PORT    0x0
 #define _BAT_ST_IN_GPIO_NUM     0x1
 
-#define _MSR_CLS_BANK_ADDR      0x010
+#define _MSR_CLS_BANK_ADDR      0x002	// 0x010
 #define _MSR_CLS_GPIO_PORT      0x0
 #define _MSR_CLS_GPIO_NUM       0x2
 
-#define _SD1_CD_BANK_ADDR       0x010
+#define _SD1_CD_BANK_ADDR       0x002	// 0x010
 #define _SD1_CD_GPIO_PORT       0x0
 #define _SD1_CD_GPIO_NUM        0x3
 
-#define _Power_in_BANK_ADDR     0x010
+#define _Power_in_BANK_ADDR     0x002	// 0x010
 #define _Power_in_GPIO_PORT     0x0
 #define _Power_in_GPIO_NUM      0x4
 
-#define _4G_CTS_BANK_ADDR       0x010
+#define _4G_CTS_BANK_ADDR       0x002	// 0x010
 #define _4G_CTS_GPIO_PORT       0x0
 #define _4G_CTS_GPIO_NUM        0x5
 
-#define _TP_IRQ_BANK_ADDR       0x010
+#define _TP_IRQ_BANK_ADDR       0x002	// 0x010
 #define _TP_IRQ_GPIO_PORT       0x0
 #define _TP_IRQ_GPIO_NUM        0x6
 
-#define _SW_DETECT_BANK_ADDR    0x010
+#define _SW_DETECT_BANK_ADDR    0x002	// 0x010
 #define _SW_DETECT_GPIO_PORT    0x0
 #define _SW_DETECT_GPIO_NUM     0x7
 
 
 // (ADDR, Port) = (010, 1)
-#define _USB1_OC_BANK_ADDR      0x010
+#define _USB1_OC_BANK_ADDR      0x002	// 0x010
 #define _USB1_OC_GPIO_PORT      0x1
 #define _USB1_OC_GPIO_NUM       0x0
 
-#define _USB2_OC_BANK_ADDR      0x010
+#define _USB2_OC_BANK_ADDR      0x002	// 0x010
 #define _USB2_OC_GPIO_PORT      0x1
 #define _USB2_OC_GPIO_NUM       0x0
 
-#define _TM_DETECT_BANK_ADDR    0x010
+#define _TM_DETECT_BANK_ADDR    0x002	// 0x010
 #define _TM_DETECT_GPIO_PORT    0x1
 #define _TM_DETECT_GPIO_NUM     0x2
 
-#define _AUD_INT_BANK_ADDR      0x010
+#define _AUD_INT_BANK_ADDR      0x002	// 0x010
 #define _AUD_INT_GPIO_PORT      0x1
 #define _AUD_INT_GPIO_NUM       0x4
 
-#define _ENET2_nINT_BANK_ADDR   0x010
+#define _ENET2_nINT_BANK_ADDR   0x002	// 0x010
 #define _ENET2_nINT_GPIO_PORT   0x1
 #define _ENET2_nINT_GPIO_NUM    0x5
 
-#define _PN5180_BUSY_BANK_ADDR   0x010
-#define _PN5180_BUSY_GPIO_PORT   0x1
-#define _PN5180_BUSY_GPIO_NUM    0x6
+#define _PN5180_BUSY_BANK_ADDR  0x002	// 0x010
+#define _PN5180_BUSY_GPIO_PORT  0x1
+#define _PN5180_BUSY_GPIO_NUM   0x6
 
-#define _Modem_Ring_BANK_ADDR   0x010
+#define _Modem_Ring_BANK_ADDR   0x002	// 0x010
 #define _Modem_Ring_GPIO_PORT   0x1
 #define _Modem_Ring_GPIO_NUM    0x7
 

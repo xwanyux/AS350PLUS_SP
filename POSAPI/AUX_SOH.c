@@ -369,7 +369,7 @@ UINT8	lrc = 0;
 	  os_AUX_Para[pUart->UartNum].RxFlag = FALSE;
 	  os_AUX_State[pUart->UartNum] = AUX_STATE_IDLE;
 	  
-	  while( BSP_UART_Read( pUart, (UINT8 *)&data, 1 ) );	// get rid of all incoming data
+//	  while( BSP_UART_Read( pUart, (UINT8 *)&data, 1 ) );	// get rid of all incoming data
 	  return( result );
 	  }
 	
@@ -455,7 +455,7 @@ UINT8	lrc = 0;
 	      
 	                lrc ^= data;					// check sum
 
-			//os_AUX_RxDataBuffer[pUart->UartNum].Data[i] = data;
+			os_AUX_RxDataBuffer[pUart->UartNum].Data[i] = data;
 			
 	                DataLen++;					// RX_LEN++
 	                i++;						// next byte
@@ -466,7 +466,7 @@ UINT8	lrc = 0;
 	                break;
 	           
 	           case AUX_STATE_LRC:
-	      			printf("\nlrc=%d\n",lrc);
+//	      			printf("\nlrc=%d\n",lrc);
 	                if( data == lrc )				// good LRC (ACK will be sent after API reading)
 	                  {
 	                  os_AUX_RxDataBuffer[pUart->UartNum].Len = DataLen;	// put LEN & DATA without leading header
@@ -474,7 +474,7 @@ UINT8	lrc = 0;
 	                  
 	                  OS_AUX_DataLinkAck_DLL( pUart, ACK );		// 2009-10-30
 	                  result = TRUE;
-					  return result;
+//					  return result;
 	                  }
 	                else
 	                  {	// bad LRC, NAK to sender

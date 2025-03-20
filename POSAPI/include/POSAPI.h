@@ -188,6 +188,7 @@ typedef	struct API_SRAM_ADDR_S
 #define	COM0				0x00//mini USB port
 #define	COM1				0x01//RJ12 RS232 port
 #define	COM2				0x02
+#define	COM3				0x03 // M6 for LTE
 
 /* Protocol */
 #define	auxBYPASS			0x00			// protocol: transparent
@@ -672,6 +673,7 @@ extern	UCHAR api_lan_txstring( UCHAR dhn, UCHAR *sbuf );
 extern	UCHAR api_lan_ping( UCHAR ip_len, UCHAR *ip, ULONG *ms );
 extern	UCHAR api_lan_setIPconfig( API_IPCONFIG config );
 extern	UCHAR api_lan_getIPconfig( API_IPCONFIG *config );
+extern  void api_lan_renewIPconfig(void);
 extern	UCHAR api_lan_setup_DHCP( UCHAR flag );
 extern	UCHAR api_lan_status_DHCP( void );
 extern  UCHAR api_lan_lstatus ( void );

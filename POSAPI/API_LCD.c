@@ -390,8 +390,9 @@ UCHAR	attr;
 	row = sbuf[0];
 	col = sbuf[1];
 	font = sbuf[2];		// attr + fid
+	fid = font & 0x0F;	// fid
 	attr = font & 0xF0;
-	// printf("row=%d  col=%d  attr=0x%02x\n",row,col,attr);
+	// printf("row=%d  col=%d  attr=0x%02x  font=&d\n",row,col,attr, font);
 	para.Row = row;
 	para.Col = col;
 
@@ -445,6 +446,8 @@ UCHAR	attr;
 //	  para.FontHeight = TFTLCD_FONT1_H;
 //	  para.FontWidth  = TFTLCD_FONT1_W;
 //	  }
+	
+	//printf("F=%d  H=%d  W=0x%02x\n",para.Font, para.FontHeight, para.FontWidth);
 	
 	para.RGB = 0;	// 2013-08-13
 	

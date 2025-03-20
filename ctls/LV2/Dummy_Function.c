@@ -74,11 +74,11 @@ UCHAR api_2DR_ReceiveData(UINT *optLen, UCHAR *optData){return apiOK;}
 UCHAR api_2DR_StopScan(void){return apiOK;}
 
 // Wayne modify
-UCHAR	apk_tsc_switch( UCHAR flag )
-{
-	api_tsc_close(0);
+// UCHAR	apk_tsc_switch( UCHAR flag )
+// {
+// 	api_tsc_close(0);
 
-	return apiOK;}
+// 	return apiOK;}
 
 //ULONG	OS_GET_KbdEventFlag( void ){return 0;}
 //void	OS_SET_KbdEventFlag( ULONG value ){;}
@@ -125,7 +125,7 @@ void OS_SET_SysTimerFreeCnt( ULONG value )
 }
 #endif
 
-#if	1
+#if	0
 ULONG OS_GET_MsrEventFlag( void )
 {
 	UCHAR msrStatus[4]={0};
@@ -140,7 +140,7 @@ ULONG OS_GET_MsrEventFlag( void )
 }
 #endif
 
-#if	1
+#if	0
 void OS_SET_MsrEventFlag( ULONG value )
 {
 	;

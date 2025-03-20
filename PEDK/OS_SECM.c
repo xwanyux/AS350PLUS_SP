@@ -147,7 +147,8 @@ FILE_INFO fileInfo[] = {
     {"FILE_DEVICE_AUTH_DATE_TIME", 12},
     {"FILE_CA_CERTIFICATE", 2048},
     {"FILE_CLIENT_CERTIFICATE", 5120},
-    {"FILE_CLIENT_PRV_KEY", 2048}
+    {"FILE_CLIENT_PRV_KEY", 2048},
+    {"FILE_DHCP_FLAG", 2}
 };
 
 // ---------------------------------------------------------------------------
@@ -636,6 +637,10 @@ void    getSecureFileName(UINT32 address, char *fileName)
 
         case ADDR_CLIENT_PRV_KEY:
             strcpy(fileName, "FILE_CLIENT_PRV_KEY");
+            break;
+
+        case ADDR_DHCP_FLAG:
+            strcpy(fileName, "FILE_DHCP_FLAG");
             break;
 
         default:

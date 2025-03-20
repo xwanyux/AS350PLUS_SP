@@ -3,6 +3,7 @@
 
 #include "POSAPI.h"
 #include "OS_PROCS.h"
+#include "OS_SECM.h"
 
 #include <stdio.h>
 #include <stdlib.h> /*for system function*/
@@ -62,11 +63,23 @@ char* command_ping = "ping -c 1 ";
 
 char* command_getGateWay = "ip route | grep default | awk '{print $3}'"; // xxx.xxx.xxx.xxx
 char* command_gateMAC = "ifconfig | grep eth0 | awk '{print $5}'"; // 3E:7A:8D:92:55:7A
-char* command_getIPAddress = "ifconfig eth0 | grep inet | awk '{print $2}'"; // will return "addr:xxx.xxx.xxx.xxx"
+// char* command_getIPAddress = "ifconfig eth0 | grep inet | awk '{print $2}'"; // will return "addr:xxx.xxx.xxx.xxx"
+char* command_getIPAddress = "ifconfig eth0 | grep inet | grep -v inet6 | awk '{print $2}'"; // will return "addr:xxx.xxx.xxx.xxx"
 char* command_getMASK = "ifconfig eth0 | grep inet | awk '{print $4}'"; //will return "Mask:xxx.xxx.xxx.xxx"
+char* command_obtainIPAddress = "dhclient eth0";    //obtain the IP configuration information from the DHCP server
+char* command_releaseIPAddress = "dhclient -r eth0";    //release the IP configuration information from the interface
 #ifdef _build_DSS_
 extern UCHAR	DSS_APPbuffer[DSS_MAX_APP_SIZE];//DSS 10MB buffer 
 #endif
+
+// DSS parameters defined in Down.c
+extern	UCHAR	DssTelNum[23+1];		
+extern	UCHAR	DssRemoteIP[23+1];	
+extern	UCHAR	DssRemotePort[23+1];
+extern	UCHAR	DssPort[23+1];
+extern  UCHAR   DssIP[23+1];
+extern  UCHAR   DssGateway[23+1];
+extern  UCHAR   DssSubNetMask[23+1];
 
 ULONG	OS_LAN_CheckConnectionTimeout( UCHAR dhn );
 
@@ -163,6 +176,18 @@ UCHAR api_lan_setIPconfig( API_IPCONFIG config ){
     //     printf("fp is not NULL\n");
     pclose(fp);
 
+    DssIP[0] = config.IP_Len;
+    memcpy(&DssIP[1], config.IP, config.IP_Len);
+
+    DssGateway[0] = config.Gateway_Len;
+    memcpy(&DssGateway[1], config.Gateway, config.Gateway_Len);
+
+    DssSubNetMask[0] = config.SubnetMask_Len;
+    memcpy(&DssSubNetMask[1], config.SubnetMask, config.SubnetMask_Len);
+
+    POST_LoadDssVariables(1);
+    PED_SetStateDHCP(0);
+
     return apiOK;
 }
 
@@ -186,13 +211,44 @@ UCHAR api_lan_getIPconfig( API_IPCONFIG *config ){
     pclose(fp);
     // output format addr:xxx.xxx.xxx.xxx
     if(strlen(response) != 0){
+        if(strlen(response) < 6)
+        {
+            POST_LoadDssVariables(0);
+
+            config->IP_Len = DssIP[0];
+            memmove(config->IP, &DssIP[1], DssIP[0]);
+
+            config->Gateway_Len = DssGateway[0];
+            memmove(config->Gateway, &DssGateway[1], DssGateway[0]);
+
+            config->SubnetMask_Len = DssSubNetMask[0];
+            memmove(config->SubnetMask, &DssSubNetMask[1], DssSubNetMask[0]);
+
+            return apiOK;
+        }
+
     //  len = strlen(response) - 5;
         len = strlen(response) - 5 - 1;	// JAMES, ignore last 0x0a
         config->IP_Len = len;
         memmove(config->IP,&response[5],len);
     }
     else
-        config->IP_Len = 0;
+    {
+        // config->IP_Len = 0;
+
+        POST_LoadDssVariables(0);
+
+        config->IP_Len = DssIP[0];
+        memmove(config->IP, &DssIP[1], DssIP[0]);
+
+        config->Gateway_Len = DssGateway[0];
+        memmove(config->Gateway, &DssGateway[1], DssGateway[0]);
+
+        config->SubnetMask_Len = DssSubNetMask[0];
+        memmove(config->SubnetMask, &DssSubNetMask[1], DssSubNetMask[0]);
+
+        return apiOK;
+    }
 
     //get mask
     fp = popen(command_getMASK, "r");
@@ -246,7 +302,33 @@ UCHAR api_lan_getIPconfig( API_IPCONFIG *config ){
 
 }
 
+// ---------------------------------------------------------------------------
+// FUNCTION: To renew the IP, gateway, netmask.
+// INPUT   : none. 
+// OUTPUT  : none.
+// RETURN  : none.
+// ---------------------------------------------------------------------------
+void api_lan_renewIPconfig(void)
+{
+    API_IPCONFIG ipconfig;
 
+    
+    if(!PED_GetStateDHCP())
+    {
+        POST_LoadDssVariables(0);
+
+        ipconfig.IP_Len = DssIP[0];
+        memmove(ipconfig.IP, &DssIP[1], DssIP[0]);
+
+        ipconfig.Gateway_Len = DssGateway[0];
+        memmove(ipconfig.Gateway, &DssGateway[1], DssGateway[0]);
+
+        ipconfig.SubnetMask_Len = DssSubNetMask[0];
+        memmove(ipconfig.SubnetMask, &DssSubNetMask[1], DssSubNetMask[0]);
+
+        api_lan_setIPconfig(ipconfig);
+    }
+}
 
 // ---------------------------------------------------------------------------
 // FUNCTION: To enable the ethernet device (LAN) and establish the link to remote host.
@@ -1262,7 +1344,89 @@ UCHAR one_Time_DHCP_Process(){
 // ---------------------------------------------------------------------------
 UCHAR	api_lan_setup_DHCP( UCHAR flag )
 {   
-    return apiOK;
+    FILE *fp;
+    API_IPCONFIG ipconfig;
+    UCHAR dhn_tim;
+    UINT  tick1, tick2;
+
+
+    if(flag)
+    {
+        if(!PED_GetStateDHCP())
+        {
+            fp = popen(command_releaseIPAddress, "r");
+            if(!fp)
+            {
+                perror("Failed to release IP address");
+                pclose(fp);
+                return apiFailed;
+            }
+
+            pclose(fp);
+        }
+
+        fp = popen(command_obtainIPAddress, "r");
+        if(!fp)
+        {
+            perror("Failed to obtain IP address");
+            pclose(fp);
+            return apiFailed;
+        }
+
+        pclose(fp);
+
+        dhn_tim = api_tim_open( 100 ); // 1 sec
+        api_tim_gettick(dhn_tim, (UCHAR *)&tick1);
+
+        while(1)
+        {
+            if(api_lan_status_DHCP() == apiReady)
+            {
+                api_lan_getIPconfig(&ipconfig);
+
+                DssIP[0] = ipconfig.IP_Len;
+                memcpy(&DssIP[1], ipconfig.IP, ipconfig.IP_Len);
+
+                DssGateway[0] = ipconfig.Gateway_Len;
+                memcpy(&DssGateway[1], ipconfig.Gateway, ipconfig.Gateway_Len);
+
+                DssSubNetMask[0] = ipconfig.SubnetMask_Len;
+                memcpy(&DssSubNetMask[1], ipconfig.SubnetMask, ipconfig.SubnetMask_Len);
+
+                POST_LoadDssVariables(1);
+                PED_SetStateDHCP(1);
+
+                api_tim_close(dhn_tim);
+                return apiOK;
+            }
+
+            api_tim_gettick(dhn_tim, (UCHAR *)&tick2);
+            if((tick2 - tick1) >= 10) // timeout?
+            {
+                api_tim_close(dhn_tim);
+                return apiFailed;
+            }
+        }
+    }
+    else
+    {
+        if(PED_GetStateDHCP())
+        {
+            fp = popen(command_releaseIPAddress, "r");
+            if(!fp)
+            {
+                perror("Failed to release IP address");
+                pclose(fp);
+                return apiFailed;
+            }
+
+            pclose(fp);
+
+            PED_SetStateDHCP(0);
+        }
+
+        return apiOK;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1275,7 +1439,7 @@ UCHAR	api_lan_setup_DHCP( UCHAR flag )
 
 UCHAR	api_lan_status_DHCP( void )
 {
-
+#if 0
     if(one_Time_DHCP_Process() == TRUE)
         return apiReady;
     else
@@ -1284,6 +1448,21 @@ UCHAR	api_lan_status_DHCP( void )
 	//   return( apiReady );
 	// else
 	//   return( apiNotReady );
+#else
+    FILE *fp;
+    UCHAR response[30] = {0};
+    UCHAR len;
+
+
+    fp = popen(command_getIPAddress, "r");
+    fgets(response, 30, fp);
+    pclose(fp);
+    // output format addr:xxx.xxx.xxx.xxx
+    if(strlen(response) != 0)
+        return apiReady;
+    else
+        return apiNotReady;
+#endif
 }
 
 

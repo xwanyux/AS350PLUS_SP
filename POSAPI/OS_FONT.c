@@ -61,6 +61,7 @@ UINT8	os_LCD_DID  =1;
 void	OS_FONT_Init( UINT8 devid )
 {
 UINT32	i;
+API_LCD_FONT	lcdft;
 
 	
 	// os_LCD_DID = devid;
@@ -69,7 +70,7 @@ UINT32	i;
 	   FDT[i].FontID = 0x00;
 
 	//if( devid == LCD_DID_STN )
-	
+#if	0	// JAMES
 	  // Init FONT0 (8x6)
 	  FDT[FONT0].FontID = FONT_0;
 	  FDT[FONT0].ByteNo = FONT6X8_BMP_LEN;
@@ -120,6 +121,65 @@ UINT32	i;
 	  FDT[FONT12].Height = FONT12_H;
 	  FDT[FONT12].BmpStAddr  = (UINT8 *)&ASCII_FONT_12X24[0];
 	  FDT[FONT12].Cross = 0;
+#else
+	  // Init FONT0 (8x16)
+	  FDT[FONT0].FontID = FONT_0;
+	  FDT[FONT0].ByteNo = FONT8X16_BMP_LEN;
+	  FDT[FONT0].Width = 8;
+	  FDT[FONT0].Height = 16;
+	  #ifdef _build_DSS_
+	  FDT[FONT0].BmpStAddr = (UINT8 *)&ext_font816[0];
+	  #else
+	  FDT[FONT0].BmpStAddr = (UINT8 *)&ASCII_FONT_8X16[0];
+	  #endif
+	  FDT[FONT0].Cross = 0;
+	  
+	  // Init FONT1 (12x24)
+	  FDT[FONT1].FontID = FONT_1;
+	  FDT[FONT1].ByteNo = FONT12X24_BMP_LEN;
+	  FDT[FONT1].Width = FONT12_W;
+	  FDT[FONT1].Height = FONT12_H;
+	  FDT[FONT1].BmpStAddr  = (UINT8 *)&ASCII_FONT_12X24[0];
+	  FDT[FONT1].Cross = 0;
+	  
+	  // Init FONT10 (8x16)
+	  FDT[FONT10].FontID = FONT_10;
+	  FDT[FONT10].ByteNo = FONT8X16_BMP_LEN;
+	  FDT[FONT10].Width = 8;
+	  FDT[FONT10].Height = 16;
+	  #ifdef _build_DSS_
+	  FDT[FONT10].BmpStAddr = (UINT8 *)&ext_font816[0];
+	  #else
+	  FDT[FONT10].BmpStAddr = (UINT8 *)&ASCII_FONT_8X16[0];
+	  #endif
+	  FDT[FONT10].Cross = 0;
+	  
+	  // Init FONT11 (12x24)
+	  FDT[FONT11].FontID = FONT_11;
+	  FDT[FONT11].ByteNo = FONT12X24_BMP_LEN;
+	  FDT[FONT11].Width = FONT12_W;
+	  FDT[FONT11].Height = FONT12_H;
+	  FDT[FONT11].BmpStAddr  = (UINT8 *)&ASCII_FONT_12X24[0];
+	  FDT[FONT11].Cross = 0;
+	  
+	  
+	// setup default TFT LCD Chinese font (FONT12, 24X24)
+	memset( &lcdft, 0, sizeof(API_LCD_FONT) );
+
+        lcdft.FontID = FONT2; // set to FONT2
+        lcdft.ByteNo = 72;
+        lcdft.Width  = 24;
+        lcdft.Height = 24;
+        lcdft.codPageNo  = 0x00;  // RFU
+        lcdft.codStAddr  = 0x00;	//(UCHAR *)ADDR_FULL_BIG5_CODE_TABLE;
+        lcdft.codEndAddr = 0x00;	//(UCHAR *)ADDR_FULL_BIG5_CODE_TABLE + 2*FULL_BIG5_CHAR_NUM - 1;
+        lcdft.bmpPageNo  = 0x00;  // RFU
+        lcdft.bmpStAddr  = 0x00;	//(UCHAR *)ADDR_FULL_PRT_FONT2_24X24_BMP;
+        lcdft.bmpEndAddr = 0x00;	//(UCHAR *)ADDR_FULL_PRT_FONT2_24X24_BMP + 72*FULL_BIG5_CHAR_NUM - 1;
+        
+	api_lcd_initfont( lcdft );
+#endif
+
 /*
 #ifndef	_LCD_ENABLED_
 
@@ -160,7 +220,7 @@ OS_FDT	*OS_FONT_GetFdtAddr( UINT8 fid )
 OS_FDT	*pFdt;
 	
 	pFdt = &FDT[fid];
-	memmove( FDTI, pFdt, FDT_IMAGE_LEN );
+//	memmove( FDTI, pFdt, FDT_IMAGE_LEN );
 	// printf("@@fid=%d pFdt->Width=%d pFdt->Height=%d\n",fid,pFdt->Width,pFdt->Height);
 	FDTI[0].FontID = pFdt->FontID;		// 2012-04-05
 	FDTI[0].ByteNo = pFdt->ByteNo;

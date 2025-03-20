@@ -182,7 +182,7 @@ UCHAR	api_tim2_status( UCHAR dhn )
  *  @param[in] ms		     time delay in mini-sec
  *  @note not sure where to put this function (is implement for EMVK and ped)
  */  
-void BSP_Delay_n_ms(UCHAR ms){
+void BSP_Delay_n_ms(ULONG ms){
    UCHAR dhn;
    ULONG micro_sec;
    micro_sec = ms * 1000; 

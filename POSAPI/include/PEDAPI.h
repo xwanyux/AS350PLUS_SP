@@ -68,6 +68,7 @@
 */
 
 extern	UCHAR	api_ped_GetPin( UINT tout, UCHAR *amt );
+extern  UCHAR	api_xped_GetPin( UINT tout, UCHAR *amt );
 extern	UCHAR	api_ped_GetKeyMode( void );
 extern	UCHAR	api_ped_GetKeyHeader_CAPK( UCHAR index, UCHAR *pkh );
 extern	UCHAR	api_ped_SelectKey_CAPK( UCHAR pki, UCHAR *rid, UCHAR *pkh, UCHAR *index );
@@ -83,6 +84,9 @@ extern	UCHAR	api_ped_GenMAC_FXKEY( UCHAR mode, UCHAR index, UCHAR *icv, UINT len
 extern	UCHAR	api_ped_GenMAC_MSKEY( UINT mode, UCHAR index, UCHAR *icv, UINT length, UCHAR *data, UCHAR *mac );
 extern	UCHAR	api_ped_GenMAC_DUKPT( UCHAR mode, UCHAR *icv, UINT length, UCHAR *data, UCHAR *mac, UCHAR *ksn );
 extern  UCHAR	api_ped_GenMAC_AES_DUKPT( UINT mode, UCHAR *icv, UINT length, UCHAR *data, UCHAR *mac, UCHAR *ksn );
+
+extern	void	api_ped_SetupPinPad( UCHAR *sbuf );
+extern  UCHAR	api_ped_SetPinPadPort( UCHAR port );
 
 //----------------------------------------------------------------------------
 #endif

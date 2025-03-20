@@ -2,7 +2,7 @@
 //============================================================================
 //****************************************************************************
 //**                                                                        **
-//**  PROJECT  : AS350+                                     **
+//**  PROJECT  : AS350+							    **
 //**  PRODUCT  : AS350	                                                    **
 //**                                                                        **
 //**  FILE     : DEV_TSC.C 	                                            **
@@ -10,7 +10,7 @@
 //**                                                                        **
 //**  VERSION  : V1.00                                                      **
 //**  DATE     : 2020/10/16                                                 **
-//**  EDITOR   : West Chu                                                **
+//**  EDITOR   : West Chu						    **
 //**                                                                        **
 //**  Copyright(C) 2013 SymLink Corporation. All rights reserved.           **
 //**                                                                        **
@@ -51,6 +51,7 @@ extern const GUI_BITMAP bmtext_SIGNHERE_180;
 extern const GUI_BITMAP bmtext_SIGNHERE;
 extern const GUI_BITMAP bmbutton_CANCEL_180;
 extern const GUI_BITMAP bmbutton_CANCEL;
+extern	UINT32	os_SysTimer_TscDownCnt;
 UCHAR SIGNFRAME[] = {
 #include "Invert_sign_frame.h"
 };
@@ -64,8 +65,15 @@ UCHAR ValidCode=0;//Capacitive touch driver will keep send message, this variabl
 UINT8	TSC_SignRawBuffer[320*120/8];
 UCHAR resetIRQ=0;
 int TSC_fd=0;
-UINT16 TSC_timerdhn=0;
-UINT16 SignPadTime;
+UINT8	TSC_timerdhn=0;
+UINT16	SignPadTime = 0;
+UINT16	TSC_timerdbuf0 = 0;
+
+UINT32	os_EXTIO_TSC_OPEN = 0;
+
+UINT32	os_TSC_RESIST = 0;	// 0=capacitive (default), 1=registive (option)
+
+
 // ---------------------------------------------------------------------------
 UINT16	os_SIGNPAD_GID = 0;		// beginning graphic id
 
@@ -87,9 +95,13 @@ UINT16	os_SIGNPAD_GID = 0;		// beginning graphic id
 #define	ID_TXT_SIGNHERE_180		9
 #define	ID_TXT_SIGNHERE			10
 
+//#define	_OUTPUT_DEBUG_
+#define	TSC_RESIST			// defined for registive TSC
+
 struct input_event TSCevent[15];
 struct timeval timeout;
 fd_set set;
+
 // ---------------------------------------------------------------------------
 // FUNCTION: To activate SignPad function.
 // INPUT   : dhn
@@ -112,11 +124,17 @@ UINT16	rx_length;
 UINT32	length;
 UINT32	retry;
 UINT8	temp[64];
-UINT8	timerdbuf = 0;
+UINT16	timerdbuf = 0;
+
+//	LIB_DispHexWord( 0, 0, SignPadTime );
+	
 	if( para.RFU[0] == SIGN_STATUS_PROCESSING )
 	  goto WAIT_STATUS;
-
-	
+#if	0
+	api_tim_gettick( TSC_timerdhn, (UINT8 *)&TSC_timerdbuf0 );
+#else
+	TSC_timerdbuf0 = os_SysTimer_TscDownCnt;
+#endif
 
 	memmove( &temp[2], (UINT8 *)&para, sizeof(API_TSC_PARA) );
 	temp[2+14] = orient;
@@ -138,14 +156,26 @@ WAIT_STATUS:
 	while(1)
 	     {
 	     //BSP_Delay_n_ms(100);
-	     api_tim_gettick( TSC_timerdhn, &timerdbuf );
-		 SignPadTime+=timerdbuf;
-		 timerdbuf = 0;
+#if	0
+	     api_tim_gettick( TSC_timerdhn, (UINT8 *)&timerdbuf );
+#else
+	     timerdbuf = os_SysTimer_TscDownCnt;
+#endif
+	     SignPadTime = (timerdbuf - TSC_timerdbuf0);
+//	     LIB_DispHexWord( 0, 0, SignPadTime );
+//	     LIB_WaitKey();
+	     
 	     *status = 0;
 	     OS_TSC_Status( tscpara, status );
-		 if(SignPadTime>para.Timeout)
-			 *status=SIGNPAD_STATUS_TIMEOUT;
-		 
+	     
+	     if(SignPadTime>para.Timeout)
+	     	{
+//	     	LIB_DispHexWord( 1, 0, SignPadTime );
+//	     	LIB_DispHexWord( 2, 0, para.Timeout );
+//	     	LIB_WaitKey();
+		*status=SIGNPAD_STATUS_TIMEOUT;
+		}
+
 		 if((*status == SIGNPAD_STATUS_CLEAR)||(*status == SIGNPAD_STATUS_EXIT))
 			 FIRSTsignFLAG=0;
 	     if( (*status == SIGNPAD_STATUS_NOT_READY) || (*status == SIGNPAD_STATUS_READY) || 
@@ -199,7 +229,7 @@ UINT  res_postemp;
 UINT32 TSC_Status(UINT16* xpos,UINT16* ypos,API_TSC_PARA para)
 {
 // UINT16 i=0,rd,xpos_bak,ypos_bak;
-UINT16 i=0,rd;
+UINT16 i=0,rd=0;
 UCHAR tx[4];
 UCHAR rx[4];
 UCHAR data;
@@ -214,78 +244,115 @@ long yoffset=-1260224;
 long scaler=65536;
 #endif
 int rv,fd=para.fd;
+
+
 	FD_ZERO(&set); /* clear the set */
 	FD_SET(fd, &set); /* add our file descriptor to the set */
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 500;//0.5ms timeout
+//	timeout.tv_usec = 0;
 	rv = select(fd+1, &set, NULL, NULL, &timeout);
 	
+//	memset( TSCevent, 0x00, sizeof(TSCevent) );
 	if (FD_ISSET(fd, &set))
         {
 		  rd=read(fd,&TSCevent, sizeof(TSCevent));//read Keypad Status
-		}
+#ifdef	_OUTPUT_DEBUG_
+		  printf("rd=%d\n", rd);
+#endif
+	}
 	if(rv == -1 || rv == 0 ){//select() timeout?????¯error
-	#ifdef TSC_RESIST
-	//if touch screen use resistive LCD panel,do nothing
-	#else
+
+//	#ifdef TSC_RESIST
+//	//if touch screen use resistive LCD panel,do nothing
+//	#else
+	if( !os_TSC_RESIST )
+	  {
 		//update interrupt pins status
 		tx[0]=0x45;
-		tx[1]=0x08;//INTCAPA
+		tx[1]=0x08;//INTCAPA (clear interrupt)
 		tx[2]=0x00;
 		SPI_Transfer(tx,rx,0,EXTIO,4);
-	#endif	
-		
+#ifdef	_OUTPUT_DEBUG_
+//	printf("INTCAPA--clear interrupt\n");	// will continuously enter this point when idle (???)
+		if( rv != 0 )
+		  printf("select_rv=%d\n", rv );
+#endif
+//	#endif	
+	  }
 		return(FALSE);		
 	}
-	else{
+	else{	
 		tx[0]=0x45;
 		tx[1]=0x09;//GPIOA
 		tx[2]=0x00;
 		SPI_Transfer(tx,rx,0,EXTIO,4);
+		
 		//å¦????select()æ²?timeout????????³NULL
 		if (rd < (int) sizeof(struct input_event)) {
+#ifdef	_OUTPUT_DEBUG_
 				printf("expected %d bytes, got %d\n", (int) sizeof(struct input_event), rd);
 				perror("\nevtest: error reading");
+#endif
 				return(FALSE);
 			}
-		
+			
+#if	0	// temp, not to process power button
+		printf( "rx[2]=%x \n", rx[2] );
 		if((rx[2]&0x80)>0)
 		{//power button not pressed
 			data=0;
 			bsp_shm_ButtPressed(1,&data);
+//#ifdef	_OUTPUT_DEBUG_
+			printf("PB not pressed\n");
+//#endif
 		}			
 		else
 		{//power button pressed
 			data=1;
 			bsp_shm_ButtPressed(1,&data);
+//#ifdef	_OUTPUT_DEBUG_
+			printf("PB pressed\n");
+//#endif
 		}
-		#ifdef TSC_RESIST
+#endif
+
+//		#ifdef TSC_RESIST
 		//if touch screen use resistive LCD panel,do nothing
+		if( os_TSC_RESIST )
+		{
 		if(res_count==0)
 			PRESSorSLIDE= 0;
-		#else
-		PRESSorSLIDE= 0;
-		#endif
+		}
+//		#else
+		else
+		  PRESSorSLIDE= 0;
+//		#endif
+		
 		for (i = 0; i < rd / sizeof(struct input_event); i++) 
 		{
-		#ifdef TSC_RESIST
+//		#ifdef TSC_RESIST
+		if( os_TSC_RESIST )
+		  {
 			if(TSCevent[i].code==330){//check if first press
 				if(TSCevent[i].value)
 					PRESSorSLIDE= 1;
 				else
-				{
+					{
 					PRESSorSLIDE= 0;
 					res_yposavg=0;
 					res_xposavg=0;
 					res_count=0;
 					return(FALSE);
-				}
+					}
 				}			
 			if(TSCevent[i].code==0){//get x axis position
 				res_xpos= TSCevent[i].value;
+			//	printf("res_xpos=%d\n", res_xpos );
 				}
 			if(TSCevent[i].code==1){//get y axis position
-				res_ypos= TSCevent[i].value;	
+				res_ypos= TSCevent[i].value;
+			//	printf("res_ypos=%d\n", res_ypos );
 				}
 			if((res_xpos>0)&&(res_ypos>0))
 			{
@@ -301,19 +368,35 @@ int rv,fd=para.fd;
 			if(res_count>2)
 			{
 				xpos_bak=res_xposavg/res_count;
+			//	printf("xpos_bak=%d\n", xpos_bak );
+				
 				ypos_bak=res_yposavg/res_count;
+			//	printf("ypos_bak=%d\n", ypos_bak );
+			
 				res_yposavg=0;
 				res_xposavg=0;
 				res_count=0;
-			}	
-		#else
+			}
+		  }
+//		#else
+		else
+		  {
+#ifdef	_OUTPUT_DEBUG_
+		printf("TSCeventCode=%d\n", TSCevent[i].code );
+#endif
 			if(TSCevent[i].code==330){//check if first press
+#ifdef	_OUTPUT_DEBUG_
+			printf(">>TSCeventValue=%d\n", TSCevent[i].value );
+#endif
 				PRESSorSLIDE= 1;
 				ValidCode=1;
-				}
+			}
 			if(TSCevent[i].code==57)
 			{
+#ifdef	_OUTPUT_DEBUG_
+			printf(">>TSCeventValue=%d\n", TSCevent[i].value );
 				// printf("TSCevent[i].code==57\n");
+#endif
 				if(TSCevent[i].value>0)
 				{
 					
@@ -328,18 +411,26 @@ int rv,fd=para.fd;
 			}
 			if(TSCevent[i].code==53){//get x axis position
 				xpos_bak= TSCevent[i].value;
+#ifdef	_OUTPUT_DEBUG_
+				printf(">>TSCeventValue=%d\n", TSCevent[i].value );
+#endif
 				ValidCode=1;
 				}
 			else if(TSCevent[i].code==54){//get y axis position
-				ypos_bak= TSCevent[i].value;	
+				ypos_bak= TSCevent[i].value;
+#ifdef	_OUTPUT_DEBUG_
+				printf(">>TSCeventValue=%d\n", TSCevent[i].value );
+#endif
 				ValidCode=1;
 				}
 			else
 			{
 				PRESSorSLIDE= 1;
 			}
-		#endif	
-		}
+//		#endif
+		  }
+		} // for(i)
+		
 		// if(ValidCode==0)
 		// 	return(FALSE);
 		ValidCode=0;//initial variable
@@ -394,13 +485,19 @@ UINT16 xpos;
 UINT16 ypos;
 UCHAR	orient;
 API_LCDTFT_RECT rect;
+
+
+	if(para.ID==FID_TSC_STATUS_BUTTON)	// 2025-03-10
+	  TSC_io_delay();
+	  
 	//if read x,y position
 	if(TSC_Status(&xpos,&ypos,para)==FALSE)
 		return(FALSE);
 
-	SignPadTime=0;
+//	SignPadTime=0;
 	orient=para.RFU[1];
-	Xstart=para.Y-1;
+//	Xstart=para.Y-1;
+	Xstart=para.Y;		// 2023-05-31
 	Ystart=para.X;
 	Xend=Xstart+para.Height;
 	Yend=Ystart+para.Width;
@@ -813,7 +910,9 @@ API_LCDTFT_ICON		gicon[1];
 API_LCDTFT_GRAPH	graph[1];
 //	BSP_Delay_n_ms(100);
 //	goto EXIT;
+#ifdef	_OUTPUT_DEBUG_
 	printf("OS_TSC_ShowSignPad\n");
+#endif
 #if	0
 	// clear screen
 	memset( (UCHAR *)&para, 0x00, sizeof(API_LCDTFT_PARA) );
@@ -1325,7 +1424,9 @@ API_LCDTFT_RECT rect;
 	    
 	  memset( pBuf, 0x00, sizeof(BMPFILEHEADER) + sizeof(BMPINFOHEADER) + sizeof(BMPRGBQUAD)*2 + para.RxLen );
 	  }
+#ifdef	_OUTPUT_DEBUG_
 	  printf("before getpixelvalue");
+#endif
 	pBufBak = pBuf;	// pointer backup
 	rotation=0;//20210915 add by west to make sure orientation when every time getsign
 	getpixelvalue(Ystart,Xstart,Yend,Xend,sign);
@@ -1362,7 +1463,9 @@ API_LCDTFT_RECT rect;
 	    free( pBufBak );
 	    free( pBuf2 );	// 2015-04-01	    
 	  }
-	printf("\033[1;31;40mresult=%d\033[0m\n",result);  
+#ifdef	_OUTPUT_DEBUG_
+	printf("\033[1;31;40mresult=%d\033[0m\n",result);
+#endif
 	return( result );
 }
 
@@ -2154,6 +2257,10 @@ SPI_LCDICON	spiicon;
 // ---------------------------------------------------------------------------
 void TSC_ExtIOInitialize(UCHAR dev_stage)
 {
+//	if( os_EXTIO_TSC_OPEN )
+//	  return;
+//	os_EXTIO_TSC_OPEN = 1;
+	  
 	if(dev_stage==DEV_OPEN){
 		//add mirror property
 		UCHAR tx[4];
@@ -2241,7 +2348,10 @@ UINT32	OS_TSC_Open()
 UINT32 os_DHN_TSC;
 UCHAR data=1;
 UCHAR *SHM_data=NULL;
-TSC_ExtIOInitialize(DEV_OPEN);
+
+
+	TSC_ExtIOInitialize(DEV_OPEN);
+
 	if(TSC_fd<1){
 		bsp_shm_acquire(SHM_data);//power button stuff
 		bsp_shm_IrqOccupied(1,&data);
@@ -2249,12 +2359,16 @@ TSC_ExtIOInitialize(DEV_OPEN);
 		if(TSC_fd==-1)
 			return( FALSE );
 	}
+#if	0
 	if(TSC_timerdhn==0)
 	{
 		TSC_timerdhn=api_tim_open( 1 );//10ms timer
 		if(TSC_timerdhn==apiOutOfService)
 			return( FALSE );
 	}
+#else
+	os_SysTimer_TscDownCnt = 0 ;
+#endif
 	setcolor(0, 0x000000);
 	rotation=0;
 	os_DHN_TSC=TSC_fd;
@@ -2284,15 +2398,21 @@ UCHAR data;
 	data=0;
 	if(TSC_fd<3)
 	{
+#ifdef	_OUTPUT_DEBUG_
 		printf("TSC_fd=%d\n",TSC_fd);
+#endif
 		return(FALSE);		
 	}
 	if(close(TSC_fd)<0)
 		return(FALSE); 
-	
+
 	bsp_shm_IrqOccupied(1,&data);//release irq event flag
 	TSC_fd = 0;
+#if	0
 	api_tim_close( TSC_timerdhn );
+#endif
+	SignPadTime=0;
+	TSC_timerdhn = 0;
 	TSC_ExtIOInitialize(DEV_CLOSE);
 	ypos_bak=0;
 	xpos_bak=0;

@@ -96,7 +96,8 @@ extern	UINT8	PED_DUKPT_GenPinBlock( UINT8 mode, UINT8 *pan, UINT8 *epb, UINT8 *k
 extern	UINT8	PED_AESKEY_GenPinBlock( UINT8 mode, UINT8 index, UINT8 *pan, UINT8 *epb );
 
 //	OS_PED3-1
-extern  UINT8	PED_AES_DUKPT_GenPinBlock( UINT16 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn );
+//extern  UINT8	PED_AES_DUKPT_GenPinBlock( UINT16 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn );
+extern  UINT8	PED_AES_DUKPT_GenPinBlock( UINT8 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn );
 
 //	OS_PED4
 extern	UINT8	PED_FXKEY_GenMAC( UINT8 mode, UINT8 index, UINT8 *icv, UINT16 length, UINT8 *data, UINT8 *mac );

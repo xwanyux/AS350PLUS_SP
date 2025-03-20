@@ -71,6 +71,8 @@ UINT32	os_ped_IdleCnt = PED_IDLE_TOUT;
 UINT32	os_ped_SensitiveServiceTime = PED_SENSITIVE_SERVICE_TOUT;
 UINT32	os_ped_KeyPress = FALSE;
 
+API_LCDTFT_PARA	os_ped_EMVSignPadPara;		// APP->EMVK.InitKernel -> EMV_CB_SetupPinPad() -> api_ped_SetupPinPad() -> os_ped_EMVSignPadPara
+
 #ifdef	_BOOT_FROM_POST0_
 UINT32	os_ped_activity = TRUE;
 #else
@@ -4016,8 +4018,9 @@ UINT8	PED_GetPin( UINT16 tout, UINT8 *amt )
 
 	PED_InUse(TRUE);
 
-	PP_SetupPinPad(&para);	// get PIN pad settings for PIN entry function from APP layer
-	memmove(&para2, &para, sizeof(API_LCDTFT_PARA));	// para for clear function
+	// PP_SetupPinPad(&para);	// get PIN pad settings for PIN entry function from APP layer
+	memmove( &para, &os_ped_EMVSignPadPara, sizeof(API_LCDTFT_PARA) );
+    memmove(&para2, &para, sizeof(API_LCDTFT_PARA));	// para for clear function
 	para2.Col = 1;
 
 	// enable PED sound

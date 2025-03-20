@@ -236,6 +236,8 @@ API_LCDTFT_PARA para;
 // ---------------------------------------------------------------------------
 void	LIB_LCD_Puts( UINT8 row, UINT8 col, UINT8 font, UINT8 len, UINT8 *str )
 {
+#if	0	// JAMES
+
 UINT8	sbuf[3];
 UINT8	dbuf[32];
 API_LCDTFT_PARA para;
@@ -286,6 +288,26 @@ API_LCDTFT_PARA para;
         api_lcdtft_putstring( 0, para, dbuf );
         }
 // #endif
+
+#else
+
+UINT8	sbuf[3];
+UINT8	dbuf[32];
+//API_LCDTFT_PARA para;
+
+
+	sbuf[0] = row;
+	sbuf[1] = col;
+	sbuf[2] = font;
+	
+	if( (strlen(str)+1) == len )	// sizeof(str) = strlen(str)+1
+	  len--;
+	  
+	dbuf[0] = len;
+	memmove( &dbuf[1], str, len );
+	api_lcd_putstring( 0, sbuf, dbuf );
+
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -1605,10 +1627,10 @@ UINT8	len;
 UINT8	msg_PASSWORD[] = {"PASSWORD:"};
 
 
-	LIB_LCD_Puts( row, 0, FONT1, sizeof(msg_PASSWORD)-1, msg_PASSWORD );
+	LIB_LCD_Puts( row, 0, FONT0, sizeof(msg_PASSWORD)-1, msg_PASSWORD );
 	for( i=0; i<maxtry; i++ )
 	   {
-	   if( LIB_GetNumKey( 30, NUM_TYPE_STAR+NUM_TYPE_LEADING_ZERO+NUM_TYPE_LEFT_JUSTIFY, '_', FONT1, 2, 12, buf ) != TRUE )
+	   if( LIB_GetNumKey( 30, NUM_TYPE_STAR+NUM_TYPE_LEADING_ZERO+NUM_TYPE_LEFT_JUSTIFY, '_', FONT0, 2, 12, buf ) != TRUE )
 	     {
 	     result = -1;	// aborted
 	     break;
@@ -1632,7 +1654,7 @@ UINT8	msg_PASSWORD[] = {"PASSWORD:"};
 	   }
 	   
 	// over retrial counter, may erase all secure message here before returning to caller
-	LIB_LCD_ClearRow( row, 2, FONT1 );	// clear two rows before return
+	LIB_LCD_ClearRow( row, 2, FONT0 );	// clear two rows before return
 	LIB_OpenKeyAll();
 	return( result );
 }
@@ -1656,10 +1678,10 @@ UINT8	len;
 UINT8	msg_PASSWORD[] = {"PASSWORD:"};
 
 
-	LIB_LCD_Puts( row, 0, FONT1, sizeof(msg_PASSWORD)-1, msg_PASSWORD );
+	LIB_LCD_Puts( row, 0, FONT0, sizeof(msg_PASSWORD)-1, msg_PASSWORD );
 	for( i=0; i<maxtry; i++ )
 	   {
-	   if( LIB_GetNumKey( 30, NUM_TYPE_STAR+NUM_TYPE_LEADING_ZERO, '_', FONT1, 2, 12, buf ) != TRUE )
+	   if( LIB_GetNumKey( 30, NUM_TYPE_STAR+NUM_TYPE_LEADING_ZERO, '_', FONT0, 2, 12, buf ) != TRUE )
 	     {
 	     result = -1;	// aborted
 	     break;
@@ -1682,7 +1704,7 @@ UINT8	msg_PASSWORD[] = {"PASSWORD:"};
 	   }
 	   
 	// over retrial counter, may erase all secure message here before returning to caller
-	LIB_LCD_ClearRow( row, 2, FONT1 );	// clear two rows before return
+	LIB_LCD_ClearRow( row, 2, FONT0 );	// clear two rows before return
 	LIB_OpenKeyAll();
 	return( result );
 }
@@ -1709,13 +1731,13 @@ UINT32	LIB_EnterPassWordLen2(UINT32 maxtry, UINT8 row, UINT8 *psw, UINT8 entry)
 
 
     if(entry == 0)
-        LIB_LCD_Puts(row, 0, FONT1 + attrCLEARWRITE, sizeof(msg_PASSWORD1) - 1, msg_PASSWORD1);
+        LIB_LCD_Puts(row, 0, FONT0 + attrCLEARWRITE, sizeof(msg_PASSWORD1) - 1, msg_PASSWORD1);
     else
-        LIB_LCD_Puts(row, 0, FONT1 + attrCLEARWRITE, sizeof(msg_PASSWORD2) - 1, msg_PASSWORD2);
+        LIB_LCD_Puts(row, 0, FONT0 + attrCLEARWRITE, sizeof(msg_PASSWORD2) - 1, msg_PASSWORD2);
 
     for(i = 0; i < maxtry; i++)
     {
-        if(LIB_GetNumKey(30, NUM_TYPE_STAR + NUM_TYPE_LEADING_ZERO, '_', FONT1, 2, 12, buf) != TRUE)
+        if(LIB_GetNumKey(30, NUM_TYPE_STAR + NUM_TYPE_LEADING_ZERO, '_', FONT0, 2, 12, buf) != TRUE)
         {
             result = 255;	// aborted
             break;
@@ -1734,7 +1756,7 @@ UINT32	LIB_EnterPassWordLen2(UINT32 maxtry, UINT8 row, UINT8 *psw, UINT8 entry)
     }
 
     // over retrial counter, may erase all secure message here before returning to caller
-    LIB_LCD_ClearRow(row, 2, FONT1);	// clear two rows before return
+    LIB_LCD_ClearRow(row, 2, FONT0);	// clear two rows before return
     LIB_OpenKeyAll();
 
     // clear sensitive data
@@ -1757,7 +1779,7 @@ UINT32	LIB_WaitKeyYesNo( UINT8 row, UINT8 col )
 UINT8	msg_Q_YES_NO[] = {"(Y/N)?"};
 UINT8	key;
 
-	LIB_LCD_Puts( row, col, FONT1, sizeof(msg_Q_YES_NO)-1, msg_Q_YES_NO );
+	LIB_LCD_Puts( row, col, FONT0, sizeof(msg_Q_YES_NO)-1, msg_Q_YES_NO );
 	while(1)
 	     {
 	     key = LIB_WaitKey();
@@ -1783,7 +1805,7 @@ UINT32	LIB_WaitKeyMsgYesNo( UINT8 row, UINT8 col, UINT8 len, UINT8 *msg )
 {
 UINT8	key;
 
-	LIB_LCD_Puts( row, col, FONT1, len, msg );
+	LIB_LCD_Puts( row, col, FONT0, len, msg );
 	while(1)
 	     {
 	     key = LIB_WaitKey();
@@ -1809,14 +1831,14 @@ UINT32	LIB_WaitKeyMsgYesNoTO(UINT8 row, UINT8 col, UINT8 len, UINT8 *msg)
 {
     UINT8	key;
 
-    LIB_LCD_Puts(row, col, FONT1, len, msg);
+    LIB_LCD_Puts(row, col, FONT0, len, msg);
     while(1)
     {
         key = LIB_WaitTimeAndKey(3000);
         LIB_BUZ_Beep1();
         if(key == 'y')	// ENTER
         {
-            LIB_LCD_ClearRow(row, 1, FONT1);
+            LIB_LCD_ClearRow(row, 1, FONT0);
             return(TRUE);
         }
         if((key == 'x') || (key == 'n') || (key == 255))  // CANCEL, CLEAR or timeout
@@ -1909,7 +1931,7 @@ UINT8 sbuf[3], dbuf[3];
 
       sbuf[0]=row;
       sbuf[1]=col;
-      sbuf[2]=FONT1;
+      sbuf[2]=FONT0;
 
       dbuf[0]=2;
       dbuf[1]=c_hi;
@@ -1994,7 +2016,7 @@ UINT8	maxcol;
       st_row = row;
       col=0;
 
-      LIB_LCD_ClearRow( st_row, 8-st_row, FONT1 );
+      LIB_LCD_ClearRow( st_row, 8-st_row, FONT0 );
 
       for(i=0; i<length; i++)
          {
@@ -2007,15 +2029,15 @@ UINT8	maxcol;
            }
          else
            {
-           LIB_LCD_Putc( row, col, FONT1, data[i]);
+           LIB_LCD_Putc( row, col, FONT0, data[i]);
 //           LIB_LCD_Putc( row, col+1, FONT0, 0x20);
 
 	   col += 1;
 	   maxcol = 21;
            }
 
-//         col += 3;
          if(col >= maxcol)
+//         col += 3;
            {
            col = 0;
            row++;
@@ -2023,7 +2045,7 @@ UINT8	maxcol;
              {
              row = st_row;
              LIB_WaitKey();
-             LIB_LCD_ClearRow( st_row, 8-st_row, FONT1 );
+             LIB_LCD_ClearRow( st_row, 8-st_row, FONT0 );
              }
            }
          }
@@ -2058,7 +2080,7 @@ void	LIB_DumpHexDataTO(UINT8 mode, UINT8 row, UINT16 length, UINT8 *data)
     st_row = row;
     col = 0;
 
-    LIB_LCD_ClearRow(st_row, maxrow - st_row, FONT1);
+    LIB_LCD_ClearRow(st_row, maxrow - st_row, FONT0);
 
     for(i = 0; i < length; i++)
     {
@@ -2071,7 +2093,7 @@ void	LIB_DumpHexDataTO(UINT8 mode, UINT8 row, UINT16 length, UINT8 *data)
         }
         else
         {
-            LIB_LCD_Putc(row, col, FONT1, data[i]);
+            LIB_LCD_Putc(row, col, FONT0, data[i]);
             //           LIB_LCD_Putc( row, col+1, FONT0, 0x20);
 
             col += 1;
@@ -2087,7 +2109,7 @@ void	LIB_DumpHexDataTO(UINT8 mode, UINT8 row, UINT16 length, UINT8 *data)
             {
                 row = st_row;
                 LIB_WaitTimeAndKey(1500);
-                LIB_LCD_ClearRow(st_row, maxrow - st_row, FONT1);
+                LIB_LCD_ClearRow(st_row, maxrow - st_row, FONT0);
             }
         }
     }
@@ -2170,13 +2192,13 @@ UINT8 font;
            if( items > 1 )
              {
              if( user_select == 0 )
-               LIB_LCD_Putc( max_row-1, 19, FONT1, 0x94 );    // show down arrow
+               LIB_LCD_Putc( max_row-1, 19, FONT0, 0x94 );    // show down arrow
              else
                {
                if( user_select == (items - 1) )
-                 LIB_LCD_Putc( max_row-1, 19, FONT1, 0x93 );  // show up arrow
+                 LIB_LCD_Putc( max_row-1, 19, FONT0, 0x93 );  // show up arrow
                else
-                 LIB_LCD_Putc( max_row-1, 19, FONT1, 0x92 );  // show up/down arrow
+                 LIB_LCD_Putc( max_row-1, 19, FONT0, 0x92 );  // show up/down arrow
                }
              }
 LB_WAIT_KEY:

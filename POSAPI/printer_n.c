@@ -173,7 +173,7 @@ int rv,fd=TSC_fd;
 		//read error or time out
 	}
 	else
-	{//å¦????select()æ²?timeout????????³NULL
+	{//ï¿½????select()ï¿½?timeout????????ï¿½NULL
 		printf("IRQ occure!!! ");
 		// LTPA245.motor_status=MOT_STOP;
 		// while(LTPA245.motor_status!=MOT_TURNOFF);//wait until motor stop
@@ -261,6 +261,16 @@ void PRN_releaseFormFeed()
 {
 	LTPA245.flag &= ~PRN_FLAG_FORM_FEED;
 }
+//===============================================================================
+BSP_BOOL PRN_getMotorStatus()
+{
+	if( LTPA245.motor_status == MOT_ROTATING )
+	  return( TRUE );
+	else
+	  return( FALSE );
+}
+
+//===============================================================================
 void PRN_getbitmaprow(UCHAR* pdata)
 {
 	//pdata=LTPA245.pHead_row->data;
@@ -493,7 +503,7 @@ static UCHAR motor_step=0;//count motor step.
 					// printf("datasplitcount=%d\n",datasplitcount);
 					// printf("LTPA245.motor_step=%d  datasplitcount=%d\n",LTPA245.motor_step,datasplitcount);
 					
-					//>128é»?ä¸?è¡??????©æ¬¡???
+					//>128ï¿½?ï¿½?ï¿½??????ï¿½æ¬¡???
 					if(heatCount<128)
 					{
 						memset(halfdata,0x00,48);//initial print buffer
@@ -509,7 +519,7 @@ static UCHAR motor_step=0;//count motor step.
 						pre_lastbit=0;	
 						memmove(halfdata,&LTPA245.pHead_row->data,48);//third half data
 						SPI_Transfer(halfdata,rx2,SPI_8MHz,PRINTER,48);//transfer print data	
-						BSP_IO_Control(GPIO_8VBATT,0);//latch low
+					//	BSP_IO_Control(GPIO_8VBATT,0);//latch low
 						datatransflag=1;
 						struct ROWMAP *rm = LTPA245.pHead_row;
 						LTPA245.pHead_row = LTPA245.pHead_row->next;
@@ -534,7 +544,7 @@ static UCHAR motor_step=0;//count motor step.
 							pre_lastbit=0;	
 							memmove(halfdata,LTPA245.pHead_row->data,24);//first half data
 							SPI_Transfer(halfdata,rx2,SPI_8MHz,PRINTER,48);//tansfer print data
-							BSP_IO_Control(GPIO_8VBATT,0);//latch low	
+						//	BSP_IO_Control(GPIO_8VBATT,0);//latch low	
 							datasplitcount=1;
 							datatransflag=1;
 						}
@@ -554,7 +564,7 @@ static UCHAR motor_step=0;//count motor step.
 							pre_lastbit=0;
 							memmove(&halfdata[24],&LTPA245.pHead_row->data[24],24);//second half data
 							SPI_Transfer(halfdata,rx2,SPI_8MHz,PRINTER,48);//tansfer print data	
-							BSP_IO_Control(GPIO_8VBATT,0);//latch low
+						//	BSP_IO_Control(GPIO_8VBATT,0);//latch low
 							datasplitcount=2;
 							datatransflag=1;
 							struct ROWMAP *rm = LTPA245.pHead_row;
@@ -656,7 +666,7 @@ static UCHAR motor_step=0;//count motor step.
 				}			
 				// lasttime=GetNowTime();
 				lasttime=nowtime;
-				BSP_IO_Control(GPIO_8VBATT,1);//latch high
+		//		BSP_IO_Control(GPIO_8VBATT,1);//latch high
 				SPI_Transfer(tx,rx,SPI_10MHz,EXTIO,4);
 				if(!(LTPA245.motor_step%2))
 					//enable thermal head
@@ -766,12 +776,16 @@ MODE_t PRN_ioctlMode = GET_RESOURCE;
 		}
 		ioctl(STBdriver_fd, IOCTL_SWITCH_MODE ,&PRN_ioctlMode);	
 	}
+	
+#if	0
 	if(OStimerFlag)
 	{
 		OStimerFlag=0;//20210830 add by west. Terminate others but printer pthread, in case of CPU resource shortage 
 		pthread_join(OS_Timer_Thread, NULL);//wait pthread exit
 		OS_Timer_Thread=0;
 	}
+#endif
+
 //set paper and thermal ISR
 	tx[0]=0x44;
 	tx[1]=0x05;//IOCON
@@ -923,7 +937,7 @@ void PRN_Run()
 	LTPA245.motor_status = MOT_ROTATING;
 	LTPA245.status = PRINT_STATUS_BUSY;
 	// point = 0;
-	//???ç¢ºå??è³?ä¸­å??ç¨?
+	//???ç¢ºï¿½??ï¿½?ä¸­ï¿½??ï¿½?
 	// PRNRUN_flag=1;
 	if((LTPA245.flag&PRN_FLAG_FORM_FEED) !=0)//have form feed
 	{
@@ -1000,12 +1014,12 @@ void PRN_Run()
 	//BSP_WR16(EBI_PORT7_BASE,LTPA245.ctrl_reg);//change control signal
 	;
 	// point = 0;
-	//??«æ??è¨»è§£20201029
+	//??ï¿½ï¿½??è¨»è§£20201029
 	// LTPA245.pTmr_motor->Compare = setupTimer_uS(4291);
 	// BSP_TMR_Start(LTPA245.pTmr_motor);	
 	// prn_time_tick = 0;
 	// prn_sub_strobe_cnt = 0;
-	//??«æ??è¨»è§£20201029
+	//??ï¿½ï¿½??è¨»è§£20201029
 	// PRNRUN_flag=0;
 }
 void PRN_MotorSpeedSetup(unsigned long mode,struct ROWMAP *head,unsigned long size)//speed level 0~25
@@ -1021,7 +1035,7 @@ void PRN_MotorSpeedSetup(unsigned long mode,struct ROWMAP *head,unsigned long si
 	int old_SpLvModify = 0;
 	int index;
 	int speedLv;
-	if(mode == 0xFF)//???ç¨¼å??ç·????è«?æ¨¡ä?????
+	if(mode == 0xFF)//???ç¨¼ï¿½??ï¿½????ï¿½?æ¨¡ï¿½?????
 	{
 		point = 0;
 		speedLv = 26;

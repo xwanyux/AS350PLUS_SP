@@ -54,28 +54,29 @@ extern	UCHAR	AES_DUKPT_RequestPinEntry(  UCHAR keyType, UCHAR *pan, UCHAR *pinbl
 // ---------------------------------------------------------------------------
 // FUNCTION: To generate encrypted PIN block by using DUKPT key algorithm.
 // INPUT   : mode   - algorithm of PIN block.
-//		      bit0~7: (original)
-//		      	0: ISO 9564 Format 0 (ANSI X9.8)
-//		      	1: ISO 9564 Format 1
-//		      	2: ISO 9564 Format 2 (NA)
-//		      	3: ISO 9564 Format 3
-//		      bit8~15: (new for key type)
-//			0: _2TDEA_
-//			1: _3TDEA_
-//			2: _AES128_
-//			3: _AES192_
-//			4: _AES256_
-//	     pan    - PAN digits. (L-V)
+//		     bit1~4: (original)
+//		     0: ISO 9564 Format 0 (ANSI X9.8)
+//		     1: ISO 9564 Format 1
+//		     2: ISO 9564 Format 2 (NA)
+//		     3: ISO 9564 Format 3
+//		     bit5~8: (new for key type)
+//			 0: _2TDEA_
+//			 1: _3TDEA_
+//			 2: _AES128_
+//			 3: _AES192_
+//			 4: _AES256_
+//	         pan    - PAN digits. (L-V)
 // OUTPUT  : epb    - encrypted pin block (8/16/24/32 bytes).
-//	     ksn    - key serial number.  (fixed 12 bytes).
+//	         ksn    - key serial number.  (fixed 12 bytes).
 // RETURN  : apiOK
 //           apiFailed
-//	     apiDeviceError	// PED inoperative due to over use limit.
+//	         apiDeviceError	// PED inoperative due to over use limit.
 //
 // NOTE    : the first parameter of the following PED API shall be modified.
-//	     api_ped_GenPinBlock_DUKPT( UINT mode, UCHAR *pan, UCHAR *epb, UCHAR *ksn );
+//	         api_ped_GenPinBlock_DUKPT( UINT mode, UCHAR *pan, UCHAR *epb, UCHAR *ksn );
 // ---------------------------------------------------------------------------
-UINT8	PED_AES_DUKPT_GenPinBlock( UINT16 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn )
+//UINT8	PED_AES_DUKPT_GenPinBlock( UINT16 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn )
+UINT8	PED_AES_DUKPT_GenPinBlock( UINT8 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn )
 {
 UINT8	pin[PED_PIN_SLOT_LEN];
 UINT8	pinblock[8];
@@ -87,8 +88,11 @@ UINT8   isoFormat;
 
 	result = apiOK;
 	
-    isoFormat = mode & 0x00ff;
-	keyType = (mode & 0xff00) >> 8;
+    // isoFormat = mode & 0x00ff;
+	// keyType = (mode & 0xff00) >> 8;
+
+    isoFormat = mode & 0x0f;
+	keyType = mode & 0xf0;
 
     if((isoFormat == EPB_ISO0) || (isoFormat == EPB_ISO1) || (isoFormat == EPB_ISO3))
     {

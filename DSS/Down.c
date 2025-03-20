@@ -35,10 +35,13 @@ extern ULONG     DownReceiveSize;
 extern UINT32	  DSS_recieveData;
 UCHAR	DSS_APPbuffer[DSS_MAX_APP_SIZE];//10MB
 UCHAR	BSP_UART_Rxreadyflag;//if UART read done
-UCHAR	DssTelNum[23];		
-UCHAR	DssRemoteIP[23];	
-UCHAR	DssRemotePort[23];
-UCHAR	DssPort[23];
+UCHAR	DssTelNum[23+1];		
+UCHAR	DssRemoteIP[23+1];	
+UCHAR	DssRemotePort[23+1];
+UCHAR	DssPort[23+1];
+UCHAR   DssIP[23+1];
+UCHAR   DssGateway[23+1];
+UCHAR   DssSubNetMask[23+1];
 // extern BSP_BOOL EthInit();//For testing Lan
 // extern BSP_BOOL EthStart();//For testing Lan
 // extern BSP_BOOL API_EthTxString2(unsigned long length,unsigned char *string);

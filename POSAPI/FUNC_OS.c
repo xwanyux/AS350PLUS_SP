@@ -19,23 +19,23 @@
 //============================================================================
 //
 //----------------------------------------------------------------------------
-#include "bsp_types.h"
+//#include "bsp_types.h"
 //#include "bsp_wdt.h"
 //#include "za9_pmu.h"
+#include "DEV_MSR.h"
 
 #include "POSAPI.h"
 
 
-extern	volatile	UINT32	os_SysTimerFreeCnt;	// DEV_TIM.c
+extern	ULONG	OS_KBD_Status( UINT32 *ScanCode );		// DEV_KBD.c
+extern	UCHAR	Check_Present_SAM(UCHAR sam_id);		// DEF_IFM.c
+extern	void	OS_MSR_Status( UINT8 action, UINT8 *dbuf );	// DEV_MSR.c
 
-extern	volatile	UINT32	os_ScEventFlag;		// BSP_SC.c	(to be implemented)
+extern	ULONG	os_SysTimerFreeCnt;	// bsp_timer.c
 
-extern	volatile	UINT32	os_MsrEventFlag;	// BSP_MCR.c	(to be implemented)
-
-extern	volatile	UINT32	os_KbdEventFlag;	// DEV_KBD.c
-
-//extern	BSP_WDT		BspWdt;				// bsp_wdt.c
-//extern	BSP_SEM		WdtAvailable;			//
+ULONG	os_KbdEventFlag = 0;
+ULONG	os_ScEventFlag = 0;
+ULONG	os_MsrEventFlag = 0;
 
 
 // ---------------------------------------------------------------------------
@@ -68,24 +68,18 @@ void	OS_SET_SysTimerFreeCnt( ULONG value )
 // ---------------------------------------------------------------------------
 ULONG	OS_GET_KbdEventFlag( void )
 {
-	UCHAR dhn;
-	UCHAR sbuf[5];
-	UCHAR dbuf;
-    sbuf[0] = 0xff; // 7, 4, 1
-    sbuf[1] = 0xff; // 0, 8, 5, 2
-    sbuf[2] = 0xff; // 9, 6, 3
-    sbuf[3] = 0xff; // ENTER, CLEAR, CANCEL
-	dhn = api_kbd_open(0, sbuf);
+UCHAR	sc ;
 
-	if(api_kbd_status(dhn, &dbuf) == apiReady)
-		return TRUE;
-	return FALSE;
-
-#ifdef	_KBD_ENABLED_
-	return( os_KbdEventFlag );
-#else
-	return( 0 );
-#endif
+	if( os_KbdEventFlag )
+	  return( TRUE );
+	  
+	if( KBD_Status(&sc) )
+	  {
+	  os_KbdEventFlag = 1;
+	  return( TRUE );
+	  }
+	else
+	  return( FALSE );
 }
 
 // ---------------------------------------------------------------------------
@@ -96,9 +90,7 @@ ULONG	OS_GET_KbdEventFlag( void )
 // ---------------------------------------------------------------------------
 void	OS_SET_KbdEventFlag( ULONG value )
 {
-#ifdef	_KBD_ENABLED_
 	os_KbdEventFlag = value;
-#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -107,12 +99,19 @@ void	OS_SET_KbdEventFlag( ULONG value )
 // OUTPUT  : none.
 // RETURN  : value.
 // ---------------------------------------------------------------------------
-#if	0
 ULONG	OS_GET_ScEventFlag( void )
 {
-	return( os_ScEventFlag );
+	if( os_ScEventFlag )
+	  return( TRUE );
+
+	if( Check_Present_SAM(1) )
+	  {
+	  os_ScEventFlag = 1;
+	  return( TRUE );
+	  }
+	else
+	  return( FALSE );
 }
-#endif
 
 // ---------------------------------------------------------------------------
 // FUNCTION: Set the value of system global variable "os_ScEventFlag".
@@ -120,12 +119,10 @@ ULONG	OS_GET_ScEventFlag( void )
 // OUTPUT  : none.
 // RETURN  : none.
 // ---------------------------------------------------------------------------
-#if	0
 void	OS_SET_ScEventFlag( ULONG value )
 {
 	os_ScEventFlag = value;
 }
-#endif
 
 // ---------------------------------------------------------------------------
 // FUNCTION: Get the value of system global variable "os_MsrEventFlag".
@@ -133,12 +130,23 @@ void	OS_SET_ScEventFlag( ULONG value )
 // OUTPUT  : none.
 // RETURN  : value.
 // ---------------------------------------------------------------------------
-#if	0
 ULONG	OS_GET_MsrEventFlag( void )
 {
-	return( os_MsrEventFlag );
+UCHAR	dbuf[8];
+
+
+	if( os_MsrEventFlag )
+	  return( TRUE );
+	  
+	OS_MSR_Status( 1, dbuf );
+	if( dbuf[0] == TRK_STATUS_SWIPED )
+	  {
+	  os_MsrEventFlag = 1;
+	  return( TRUE );
+	  }
+	else
+	  return( FALSE );
 }
-#endif
 
 // ---------------------------------------------------------------------------
 // FUNCTION: Set the value of system global variable "os_MsrEventFlag".
@@ -146,12 +154,10 @@ ULONG	OS_GET_MsrEventFlag( void )
 // OUTPUT  : none.
 // RETURN  : none.
 // ---------------------------------------------------------------------------
-#if	0
 void	OS_SET_MsrEventFlag( ULONG value )
 {
 	os_MsrEventFlag = value;
 }
-#endif
 
 
 

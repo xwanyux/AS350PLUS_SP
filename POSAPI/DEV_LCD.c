@@ -8,6 +8,7 @@
 #include "DEV_PCD.h"
 UINT8	os_pImageData2[LCD_XRES*LCD_YRES/8];	// LCD_YRES,LCD_XRES defined in DEV_LCD.h. Char font Maximun value
 API_LCDTFT_GRAPH IDT[GRAPHIC_ID_MAX_ORDER];//store graphic ID 
+UINT8	*IDT_PDATA[GRAPHIC_ID_MAX_ORDER];	// 2025-02-12, keep GUI_BITMAP.pData (pointer to the image data)
 UCHAR IDorder=0;//order number of graphic's ID
 UINT32 graphic_size=0;//order number of graphic's ID
 extern uint32_t xres, yres;//declared in fbutils-linux.c
@@ -20,7 +21,9 @@ UCHAR OS_LCDTFT_ClrScreen(API_LCDTFT_PARA para){
 	memmove(&colormap,&BGpalette,sizeof(BGpalette));
 	rotation=ROTATE_270;
 	setcolor(0, colormap);
-	fillrect(0, 0, xres , yres ,0);
+	//printf("OS_LCDTFT_ClrScreen() xres=%d, yres=%d\n", xres, yres );
+	fillrect(0, 0, xres , yres ,0);		// 2025-02-11
+//	fillrect(0, 0, xres-1 , yres-1 ,0);	// JAMES
 	rotation=rotate_bak;
 	return TRUE;
 }
@@ -37,12 +40,16 @@ UINT16 Xstart,Ystart,Xend,Yend;
 	memmove(&colormap,&BGpalette,sizeof(BGpalette));
 	rotation=ROTATE_0;
 	setcolor(0, colormap);
-	// printf("Xstart=%d\tYstart=%d\tXend=%d\tYend=%d\n",Xstart,Ystart,Xend,Yend);
-	fillrect(Xstart, Ystart, Xend, Yend,0);
+//	 printf("Xstart=%d\tYstart=%d\tXend=%d\tYend=%d\n",Xstart,Ystart,Xend,Yend);
+//	fillrect(Xstart, Ystart, Xend, Yend,0);
+	fillrect(Xstart, Ystart, Xend-1, Yend-1,0);	// JAMES
 	return TRUE;
 }
+
 UINT32	OS_LCDTFT_PutGraphics( API_LCDTFT_GRAPH graph )
 {
+#if	0
+
 	UCHAR IDorder2=IDorder;
 	//printf("LCDTFT_PutGraphics\n");
 	//printf("IDorder=%d\n",IDorder);
@@ -70,23 +77,122 @@ UINT32	OS_LCDTFT_PutGraphics( API_LCDTFT_GRAPH graph )
 	IDorder=IDorder2;
 	IDorder++; 
 	return apiOK;
+#else
+
+ULONG	datalen;
+ULONG	index;
+UCHAR	*pData;
+
+
+	UCHAR IDorder2=IDorder;
+	//printf("LCDTFT_PutGraphics\n");
+	//printf("IDorder=%d\n",IDorder);
+	
+	// PATCH: 2023-08-14
+	if( graph.ID == 0 )	// ID=0 for dedicated icon, ID=1..n for preload icons.
+	  {
+//	  IDorder = 0;
+	  IDorder2 = 0;
+	  
+	  memmove(&IDT[IDorder2],&graph,sizeof(API_LCDTFT_GRAPH));	// 2023-12-22
+//	  return( apiOK );
+
+	  index = IDorder2;
+	  goto EXIT;
+	  }
+	
+	if(IDorder2>0){
+		for(UCHAR i=0;i<IDorder2;i++){//check if ID number input before
+			if(IDT[i].ID==graph.ID){
+			IDorder=i;
+			IDorder2--;
+			// printf("IDorder=%d\n",IDorder);
+			//memmove(&IDT[i],0x00,sizeof(API_LCDTFT_GRAPH));
+			break;
+			}
+		}
+	 }
+
+	if(IDorder>GRAPHIC_ID_MAX_ORDER||graphic_size>GRAPHIC_MAX_SIZE)
+	{//if graphic order number exceed 100 or total graphic size exceed 4MB 
+		return apiOutOfService;
+	}
+	
+	if( graph.ID )	// PATCH: 2023-08-14
+	{
+	  graphic_size+=graph.Bitmap.YSize*graph.Bitmap.BytesPerLine;
+	  if(graphic_size>GRAPHIC_MAX_SIZE){//if total graphic size exceed 4MB
+		return apiOutOfService;
+	  }
+	}
+	
+	if( IDorder2 == 0 )
+	  {
+	  IDorder2 = 1;
+	  IDorder = 1;
+	  }
+//	printf( "IDorder(0)=%x\n", IDorder );
+	memmove(&IDT[IDorder],&graph,sizeof(API_LCDTFT_GRAPH));
+		
+	IDorder=IDorder2;
+	IDorder++; 
+//	printf( "IDorder(1)=%x\n", IDorder );
+	
+
+	index = IDorder2;
+EXIT:
+	datalen=graph.Bitmap.BytesPerLine*graph.Bitmap.YSize;
+	pData = malloc( datalen );
+	if( pData )
+	  {
+	  memmove( pData, graph.Bitmap.pData, datalen );
+	  IDT_PDATA[index] = pData;
+//	  printf("\nIDT_PDATA[%x]=%p\n", index, IDT_PDATA[index] );
+	  }
+	else
+	  {
+	  printf("\nOS_LCDTFT_PutGraphics()--out of memory");
+	  return apiFailed;
+	  }
+
+//	for( int i=1; i<3; i++ )
+//	   {
+//	   printf("IDT[i].Bitmap.XSize=%x\n", IDT[i].Bitmap.XSize );
+//	   printf("IDT[i].Bitmap.YSize=%x\n", IDT[i].Bitmap.YSize );
+//	   printf("IDT[i].Bitmap.BytesPerLine=%x\n", IDT[i].Bitmap.BytesPerLine );
+//	   printf("IDT[i].Bitmap.BitsPerPixel=%x\n", IDT[i].Bitmap.BitsPerPixel );
+//	   printf("IDT[i].Bitmap.pData=%p\n", IDT[i].Bitmap.pData );
+//	   printf("\n");
+//	   }
+	   
+	return apiOK;
+
+#endif
 }
+
 UINT32 OS_LCDTFT_ShowICON(API_LCDTFT_ICON icon){
 	UCHAR IDorder2=IDorder;
 	UCHAR result;
 	UCHAR rotate_bak=0;
-	// printf("OS_LCDTFT_ShowICON\n");
-	// printf("IDorder2=%d\n",IDorder2);
+	
+	
+//	printf("OS_LCDTFT_ShowICON\n");
+//	printf("IDorder2(0)=%d\n",IDorder2);
 	rotate_bak=rotation;
+	
 	for(UCHAR i=0;i<IDorder2;i++){
 		if(IDT[i].ID==icon.ID)
 			IDorder2=i;
 		else if(i==IDorder2-1)
 			return apiFailed;
 	}
+//	printf("IDorder2(1)=%d\n",IDorder2);
 	rotation=ROTATE_270;
 	// printf("icon.Xleft=%d\n",icon.Xleft);
 	// printf("icon.Ytop=%d\n",icon.Ytop);
+	
+	IDT[IDorder2].Bitmap.pData = IDT_PDATA[IDorder2];
+	
 #ifndef _SCREEN_SIZE_480x320
 	if(IDT[IDorder2].RGB==GUI_DRAW_BMP555)
 		result=put_graphic_BMP555(icon.Ytop,240-icon.Xleft-icon.Width,icon.Width,icon.Height,(UCHAR*)IDT[IDorder2].Bitmap.pData);
@@ -99,7 +205,17 @@ UINT32 OS_LCDTFT_ShowICON(API_LCDTFT_ICON icon){
 		result=put_graphic(icon.Ytop,LCD_XRES-icon.Xleft-icon.Height,icon.Width,icon.Height,(UCHAR*)IDT[IDorder2].Bitmap.pData);
 #endif
 	rotation=rotate_bak;
-	return result;                                                                  
+	
+	printf("\nicon.ID=%x\n", icon.ID );
+	if( icon.ID == 0 )	// free non-preloaded data storage
+	  {
+//	  printf("\nFree IDT_PDATA[0]=%p\n", IDT_PDATA[0] );
+	  
+	  if( IDT_PDATA[0] )
+	    free( IDT_PDATA[0] );
+	  }
+	
+	return result;                                                               
 }                                                                                   
 UCHAR OS_LCDTFT_PutStr( UCHAR *data,API_LCDTFT_PARA para,UCHAR fontLen ){
 	put_string(para.Col,para.Row , data,  para, fontLen);
@@ -117,11 +233,21 @@ UCHAR OS_LCDTFT_FillRECT(API_LCDTFT_RECT rect){
 	rotation=ROTATE_270;
 	memmove(&colormap,&BGpalette,sizeof(BGpalette));
 	setcolor(0, colormap);
-#ifndef _SCREEN_SIZE_480x320
-	fillrect( rect.Ystart, 240-rect.Xstart, rect.Yend,240-rect.Xend,0);
-#else
-	fillrect( rect.Ystart, LCD_XRES-rect.Xstart, rect.Yend,LCD_XRES-rect.Xend,0);
-#endif
+	
+//#ifndef _SCREEN_SIZE_480x320
+//	fillrect( rect.Ystart, 240-rect.Xstart, rect.Yend,240-rect.Xend,0);
+//#else
+//	fillrect( rect.Ystart, LCD_XRES-rect.Xstart, rect.Yend,LCD_XRES-rect.Xend,0);
+//#endif
+
+	if( rect.Xend >= LCD_XRES )	// 2025-03-10
+	  rect.Xend = LCD_XRES - 1;	//
+	if( rect.Yend >= LCD_YRES )	//
+	  rect.Yend = LCD_YRES - 1;	//
+
+	if( (rect.Xstart <= (LCD_XRES-1)) && (rect.Xend <= (LCD_XRES-1)) )
+	  fillrect( rect.Ystart, LCD_XRES-rect.Xstart-1, rect.Yend,LCD_XRES-rect.Xend-1,0);
+
 	rotation=rotate_bak;
 }
 UINT32	OS_LCDTFT_TransformCharBitmap( UINT32 Height, UINT32 Width, UINT8 *pImageData )
@@ -546,9 +672,109 @@ UINT32	OS_LCDTFT_ShowPCD( API_PCD_ICON icon )
 UINT8	*Para;
 UINT32	result;
 UINT16 ParaLen=16;
+
 	Para=&icon;
-	OS_EnableTimer1();
+//	OS_EnableTimer1();	// 2024-08-08, not necessary
 	result=PCD_ShowPCD( ParaLen, Para );
+	if( result == apiOK )
+	  result = TRUE;
+	else
+	  result = FALSE;
 	
 	return( result );
+}
+
+// ---------------------------------------------------------------------------
+// FUNCTION: to expand one char bitmap from 16x16 to 32x32.
+// INPUT   : data - the data byte.
+// OUTPUT  : none.
+// RETURN  : the expanded data word. (2 bytes)
+// ---------------------------------------------------------------------------
+UINT16	LCD_ExpandBitmap_16T32( UINT8 data )
+{
+UINT32	i;
+UINT8	result;		// result
+UINT8	data_hi;	// hi-nibble
+UINT8	data_lo;	// lo-nibble
+
+
+	// low nibble
+	result = 0;
+	for( i=0; i<4; i++ )	// 4-bit
+	   {
+	   if( data & (1 << i) )
+	     {
+	     result >>= 1;	// rotate right with carry
+	     result |= 0x80;
+	     result >>= 1;	// rotate right with carry
+	     result |= 0x80;
+	     }
+	   else
+	     {
+	     result >>= 1;
+	     result >>= 1;
+	     }
+	   }
+	data_lo = result;
+
+	// high nibble
+	result = 0;
+	for( i=4; i<8; i++ )	// 4-bit
+	   {
+	   if( data & (1 << i) )
+	     {
+	     result >>= 1;	// rotate right with carry
+	     result |= 0x80;
+	     result >>= 1;	// rotate right with carry
+	     result |= 0x80;
+	     }
+	   else
+	     {
+	     result >>= 1;
+	     result >>= 1;
+	     }
+	   }
+	data_hi = result;
+
+	return( data_lo + data_hi*256 );
+}
+
+// ---------------------------------------------------------------------------
+// FUNCTION: to build 16x32 bitmap from 8x16 pattern. (FONT1)
+// INPUT   : OldBmp - ptr to 8x16 pattern (16 bytes).
+// OUTPUT  : NewBmp - ptr to 16x32 pattern (64 bytes).
+// RETURN  : none.
+//
+//      BYTE  0 ->  00,01
+//		    02,03
+//            1 ->  04,05
+//		    06,07
+//	      2 ->  08,09
+//		    10,11
+//	      3 ->  12,13
+//		    14,15
+//	      ...
+//	     15 ->  60,61
+//		    62,63
+// ---------------------------------------------------------------------------
+void	LCD_BuildBitmap_16X32( UINT8 *OldBmp, UINT8 *NewBmp )
+{
+//UINT8	NewBmp[64];
+UINT32	i;
+UINT8	*pImage;
+UINT16	data;
+
+	   
+	for( i=0; i<16; i++ )
+	   {
+	   pImage = &NewBmp[i*4];	// current dst addr
+	   
+	   data = LCD_ExpandBitmap_16T32( *OldBmp++ );
+	   pImage[0] = (data & 0xFF00) >> 8;
+	   pImage[1] = data & 0x00FF;
+	   pImage[2] = pImage[0];
+	   pImage[3] = pImage[1];
+	   }
+
+//	return( &NewBmp[0] );	// new bitmap
 }

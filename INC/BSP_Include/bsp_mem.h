@@ -13,8 +13,8 @@
 #ifndef _BSP_MEM_H_
 #define _BSP_MEM_H_
 
+#include <stdlib.h> // malloc free
 #include "bsp_types.h"
-
 
 
 /*
@@ -42,7 +42,8 @@
  * array defined in os_mem.c.  This memory block will be within the BSS
  * section of the memory map.
  */
-#define SYS_MEMORY_SIZE		( 1024 * 2048 )
+//#define SYS_MEMORY_SIZE		( 1024 * 1024 )
+//#define SYS_MEMORY_SIZE2	( 1024 * 1024 )
 
 
 
@@ -53,22 +54,26 @@
  * DMA_MEMORY_BASE.  This region can be moved/ resized as appropraie,
  * but the memory must always reside in the same physical memory device.
  */
-//#define DMA_MEMORY_BASE		0x8000
-//#define DMA_MEMORY_BASE		0x20700000		// primitive BSP
-#define DMA_MEMORY_BASE			0x20D00000		// PATCH: 2009-11-17
-//#define DMA_MEMORY_BASE		0x20A00000		// PATCH: 2009-12-09, for global DSS
-#define DMA_MEMORY_SIZE		( 1024 * 32 )
-
-#define INT_MEMORY_BASE		0xDFF0C000
-#define INT_MEMORY_SIZE		( 1024 * 16 )
-
-#define SEC_MEMORY_BASE		SEC_SRAM_BASE
-#define SEC_MEMORY_SIZE		( 1024 * 4 )
+////#define DMA_MEMORY_BASE		0x8000
+////#define DMA_MEMORY_BASE		0x20700000		// primitive BSP
+////#define DMA_MEMORY_BASE		0x20D00000		// PATCH: 2009-11-17
+////#define DMA_MEMORY_BASE		0x20A00000		// PATCH: 2009-12-09, for global DSS
+////#define DMA_MEMORY_BASE		0x20C00000		// PATCH: 2013-02-15, for SSL application
+//#define DMA_MEMORY_BASE			0x21000000		// 2015-03-05, for HAL config
+//#define DMA_MEMORY_SIZE		( 1024 * 32 )
+//
+//
+//#define INT_MEMORY_BASE		0xDFF0C000
+//#define INT_MEMORY_SIZE		( 1024 * 16 )
+//
+//#define SEC_MEMORY_BASE		SEC_SRAM_BASE
+//#define SEC_MEMORY_SIZE		( 1024 * 4 )
 
 
 /*
  * Function Prototypes
  */
+/*
 extern BSP_STATUS BSP_MEM_Init( void );
 extern BSP_HANDLE BSP_Malloc( UINT32 Size );
 extern void BSP_Free( BSP_HANDLE pData );
@@ -89,30 +94,35 @@ extern void MemMgrInit(	UINT32 Base, UINT32 Len );
 extern void * getmem( void * pPool,	UINT32 NumBytes );
 extern void freemem( void * pMem );
 
-
+extern	void	*NEW_malloc( UINT32 nbytes );
+extern	void	NEW_free( void *pData );
+extern	void	*NEW_realloc( void *pData, UINT32 nbytes );
+*/
 
 /*
  * Memory pools
  */
+/*
 extern UINT8 					SysMemory[];
+extern UINT8 					SysMemory2[];
 extern UINT8				 * pDmaMemory;
 extern UINT8				 * pIntMemory;
 extern UINT8				 * pSecMemory;
-
+*/
 
 /*
  * Memory managemenr macros definition for memory allocation
  */
-#if defined BSP_OS_IS_NO_OS || defined BSP_OS_IS_NOS
-	#define BSP_Malloc( Size )		getmem( SysMemory, (Size) )
-	#define BSP_Free( pMem )		freemem( (pMem) )
-	#define BSP_DmaMalloc( Size )	getmem( pDmaMemory, (Size) )
-	#define BSP_DmaFree( pMem )	freemem( (pMem) )
-	#define BSP_IntMalloc( Size )	getmem( pIntMemory, (Size) )
-	#define BSP_IntFree( pMem )	freemem( (pMem) )
-	#define BSP_SecMalloc( Size )	getmem( pSecMemory, (Size) )
-	#define BSP_SecFree( pMem )	freemem( (pMem) )
-#endif
+//#if defined BSP_OS_IS_NO_OS || defined BSP_OS_IS_NOS
+	#define BSP_Malloc( Size )	malloc( (Size) )
+	#define BSP_Free( pMem )	free( (pMem) )
+//	#define BSP_DmaMalloc( Size )	getmem( pDmaMemory, (Size) )
+//	#define BSP_DmaFree( pMem )	freemem( (pMem) )
+//	#define BSP_IntMalloc( Size )	getmem( pIntMemory, (Size) )
+//	#define BSP_IntFree( pMem )	freemem( (pMem) )
+//	#define BSP_SecMalloc( Size )	getmem( pSecMemory, (Size) )
+//	#define BSP_SecFree( pMem )	freemem( (pMem) )
+//#endif
 
 
 

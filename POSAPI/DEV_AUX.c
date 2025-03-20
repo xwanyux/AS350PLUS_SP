@@ -32,6 +32,7 @@ extern 		void 	OS_EnableTimer1();
 extern		BSP_UART *os_pAUX0;
 extern		BSP_UART *os_pAUX1;
 extern		BSP_UART *os_pAUX2;
+extern		BSP_UART *os_pAUX3;
 
 extern		UINT32	os_SOH_LEN_TYPE;
 extern		UINT32	os_DLL_ACK_MODE;
@@ -39,6 +40,7 @@ extern		UINT32	os_DLL_ACK_MODE;
 extern		UCHAR	os_DHN_AUX0;
 extern		UCHAR	os_DHN_AUX1;
 extern		UCHAR	os_DHN_AUX2;
+extern		UCHAR	os_DHN_AUX3;
 
 API_AUX		os_AUX_Para[BSP_MAX_UARTS];		// parameters of each AUX port
 API_AUX		os_AUX_ParaBak[BSP_MAX_UARTS];		// backup for AUX parameters
@@ -152,6 +154,8 @@ UINT32	flag;
 	  {
 	  os_AUX_Para[pUart->UartNum].TxFlag = FALSE;	// end of resend process
 //	  os_AUX_Status[pUart->UartNum] = AUX_STATUS_FREE;	// 2014-08-26, removed
+
+	  os_AUX_State[pUart->UartNum] = 0;	// 2025-02-18
 	  
 	  return( FALSE );
 	  }
@@ -163,9 +167,10 @@ UINT32	flag;
 // OUTPUT  : none.
 // RETURN  : none.
 // ---------------------------------------------------------------------------
-UINT TOBbak;
+//UINT TOBbak;
 void	OS_AUX_TaskProcessTout( UINT32 port )
 {
+#if	0
 BSP_UART *pUart;
 	
 	
@@ -211,7 +216,38 @@ BSP_UART *pUart;
 	      OS_AUX_DataLinkRxTOB( port );	// 2009-11-01
 	    }
 	  }
+
+#else	// 2025-02-04, using old AS350 method
+
+BSP_UART *pUart;
 	
+	
+	// Task for transmitting
+	if( os_AUX_State[port] == AUX_STATE_WAIT_ACK )
+	  {
+	  if( (os_AUX_Para[port].Mode != 0xFF) && (os_AUX_Para[port].TxFlag == TRUE) )
+	    {
+	    if( os_AUX_Para[port].Tor )
+	      os_AUX_Para[port].Tor -= 1;
+	    else
+	      {
+	      pUart = AUX_GetDHN( port );
+	      if( pUart )
+	        OS_AUX_ResendPackage( pUart );	// resend last package
+	      }
+	    }
+	  }
+	else	// Task for receiving
+	  {
+	  if( (os_AUX_Para[port].Mode != 0xFF) && (os_AUX_Para[port].RxFlag == TRUE) )
+	    {
+	    if( os_AUX_Para[port].Tob )
+	      os_AUX_Para[port].Tob -= 1;
+	    else
+	      OS_AUX_DataLinkRxTOB( port );	// 2009-11-01
+	    }
+	  }
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -237,6 +273,7 @@ UINT32	OS_AUX_TaskCheckTob( BSP_UART *pUart )
 // ---------------------------------------------------------------------------
 void	OS_AUX_FlowControl( void )
 {
+#if	0
 UINT32	i;
 
 	do
@@ -258,6 +295,15 @@ UINT32	i;
 		}
 			
 	}while(1);
+	
+#else		// 2025-02-04, using old AS350 method, called by OS_Timer1Int()
+
+UINT32	i;
+
+	// Protocol - DLL
+	for( i=0; i<BSP_MAX_UARTS; i++ )
+	   OS_AUX_TaskProcessTout( i );
+#endif
 } 
 
 // ---------------------------------------------------------------------------
@@ -558,7 +604,8 @@ UINT32	stopbits;
 UINT32	parity;
 UINT32	buffersize;
 UINT32	FCTL;
-	OS_EnableTimer1();//Enable OS_AUX_FlowControl timer
+
+//	OS_EnableTimer1();//Enable OS_AUX_FlowControl timer
 
 	
 	
@@ -760,12 +807,16 @@ UINT32	FCTL;
 	memset( &os_AUX_RxDataBuffer[pUart->UartNum], 0x00, sizeof(AUX_DATA) );	// 2009-10-30
 	memset( &os_AUX_TxDataBuffer[pUart->UartNum], 0x00, sizeof(AUX_DATA) );	//
 	os_AUX_DataLen[pUart->UartNum]=0;
+	
+#if	0
 	if(pFlowControlTimer==NULL)
 	{
 		pFlowControlTimer=BSP_TMR_Acquire(1);//10msec
 		BSP_TMR_Start( (void *)&OS_AUX_FlowControl,pFlowControlTimer );//Start the timer
 		TimeoutCount=0;
 	}
+#endif
+
 	return( pUart );
 }
 
@@ -812,8 +863,8 @@ UINT8	ACKresponse = ACK ;
 static UINT8	res = 0,resBAK=0 ;
 	
 	
-    if(os_AUX_RxDataBuffer[pUart->UartNum].Len > 0)
-        goto RX_READY;
+    // if(os_AUX_RxDataBuffer[pUart->UartNum].Len > 0)
+    //     goto RX_READY;
 
 	if( type && (os_AUX_Para[pUart->UartNum].Mode == AUX_MODE_BYPASS) )
 	  {
@@ -844,7 +895,7 @@ static UINT8	res = 0,resBAK=0 ;
 	
 	
 	
-RX_READY:		
+// RX_READY:		
 	if( len )
 	{
 	  if( os_SOH_LEN_TYPE == 0 )

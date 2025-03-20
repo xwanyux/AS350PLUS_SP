@@ -40,7 +40,7 @@
 
 //mml_skbd_keys_t os_KBD_keys = {0, 0, 0, 0};
 volatile int	os_KBD_PressStatus = FALSE;		// key_pressed
-volatile UINT32	os_KbdEventFlag = 0;			// CANCEL key stroke will set this flag, reset by APP
+// volatile UINT32	os_KbdEventFlag = 0;			// CANCEL key stroke will set this flag, reset by APP
 
 UINT8	KBD_Kat[KBD_KAT_SIZE];				// keyboard allocation table, default all keys enabled
 

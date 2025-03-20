@@ -22,6 +22,9 @@
 #include "OS_MSG.h"
 #include "DEV_PED.h"
 #include "TSCAPI.h"
+#include "FLASHAPI.h"
+#include "OS_FLASH.h"
+#include "FSAPI.h"
 #if 0   //used for PEDK test
 #include "GDATAEX.h"
 #include "PEDAPI.h" 
@@ -146,12 +149,12 @@ void	ShowPEDVersions(void)
 
     LIB_LCD_Cls();
 
-    LIB_LCD_Puts(2, 0, FONT1, sizeof(msg_HWV) - 1, (UINT8 *)msg_HWV);
-    LIB_LCD_Puts(3, 0, FONT1, sizeof(msg_FWV) - 1, (UINT8 *)msg_FWV);
-    LIB_LCD_Puts(4, 0, FONT1, sizeof(msg_APV) - 1, (UINT8 *)msg_APV);
+    LIB_LCD_Puts(2, 0, FONT0, sizeof(msg_HWV) - 1, (UINT8 *)msg_HWV);
+    LIB_LCD_Puts(3, 0, FONT0, sizeof(msg_FWV) - 1, (UINT8 *)msg_FWV);
+    LIB_LCD_Puts(4, 0, FONT0, sizeof(msg_APV) - 1, (UINT8 *)msg_APV);
 
     if(OS_SECM_VerifySredStatus() == TRUE)
-        LIB_LCD_Puts(5, 0, FONT1, sizeof(msg_SRV) - 1, (UINT8 *)msg_SRV);
+        LIB_LCD_Puts(5, 0, FONT0, sizeof(msg_SRV) - 1, (UINT8 *)msg_SRV);
     
     LIB_WaitTime(100);
 }
@@ -173,13 +176,13 @@ void	ShowIdentifierInfo(void)
 
     LIB_LCD_Cls();
 
-    LIB_LCD_Puts(2, 0, FONT1, sizeof(msg_modelName) - 1, (UINT8 *)msg_modelName);
-    LIB_LCD_Puts(3, 0, FONT1, sizeof(msg_HWV) - 1, (UINT8 *)msg_HWV);
-    LIB_LCD_Puts(4, 0, FONT1, sizeof(msg_FWV) - 1, (UINT8 *)msg_FWV);
-    LIB_LCD_Puts(5, 0, FONT1, sizeof(msg_APV) - 1, (UINT8 *)msg_APV);
+    LIB_LCD_Puts(2, 0, FONT0, sizeof(msg_modelName) - 1, (UINT8 *)msg_modelName);
+    LIB_LCD_Puts(3, 0, FONT0, sizeof(msg_HWV) - 1, (UINT8 *)msg_HWV);
+    LIB_LCD_Puts(4, 0, FONT0, sizeof(msg_FWV) - 1, (UINT8 *)msg_FWV);
+    LIB_LCD_Puts(5, 0, FONT0, sizeof(msg_APV) - 1, (UINT8 *)msg_APV);
 
     if(OS_SECM_VerifySredStatus() == TRUE)
-        LIB_LCD_Puts(6, 0, FONT1, sizeof(msg_SRV) - 1, (UINT8 *)msg_SRV);
+        LIB_LCD_Puts(6, 0, FONT0, sizeof(msg_SRV) - 1, (UINT8 *)msg_SRV);
     
     LIB_WaitKey();
 }
@@ -214,7 +217,7 @@ void    SegV_handler(int sig)
     api_lcdtft_open(0);
     LIB_LCD_Cls();
     write(2, "stack overflow\n", 15);
-    LIB_LCD_Puts(0, 0, FONT1+attrREVERSE, strlen(text_STACK_CORRUPT), (UINT8 *)text_STACK_CORRUPT);
+    LIB_LCD_Puts(0, 0, FONT0+attrREVERSE, strlen(text_STACK_CORRUPT), (UINT8 *)text_STACK_CORRUPT);
     _exit(1);
 }
 
@@ -500,53 +503,53 @@ void    Tamper_DisplayTamperMessage(UCHAR tamperResult)    //Modified by Tammy
     if(tamperResult & (1 << 0))
     {
         printf("\033[1;31;40mExternal Tampering 1 Detected\033[0m\n");
-        LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg1), (UINT8 *)tamperMsg1);
+        LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg1), (UINT8 *)tamperMsg1);
         line++;
     }
         
     if(tamperResult & (1 << 1))
     {
         printf("\033[1;31;40mExternal Tampering 2 Detected\033[0m\n");
-        LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg2), (UINT8 *)tamperMsg2);
+        LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg2), (UINT8 *)tamperMsg2);
         line++;
     }
     
     if(tamperResult & (1 << 2))
     {
         printf("\033[1;31;40mExternal Tampering 3 Detected\033[0m\n");
-        LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg3), (UINT8 *)tamperMsg3);
+        LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg3), (UINT8 *)tamperMsg3);
         line++;
     }
 
     if(tamperResult & (1 << 3))
     {
         printf("\033[1;31;40mExternal Tampering 4 Detected\033[0m\n");
-        LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg4), (UINT8 *)tamperMsg4);
+        LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg4), (UINT8 *)tamperMsg4);
         line++;
     }
 
     if(tamperResult & (1 << 4))
     {
         printf("\033[1;31;40mExternal Tampering 5 Detected\033[0m\n");
-        LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg5), (UINT8 *)tamperMsg5);
+        LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg5), (UINT8 *)tamperMsg5);
         line++;
     }
 
     // if(tamperResult & (1 << 5))
     // {
     //     printf("\033[1;31;40mTemperature Tampering Detected\033[0m\n");
-    //     LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg6), (UINT8 *)tamperMsg6);
+    //     LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg6), (UINT8 *)tamperMsg6);
     //     line++;
     // }
 
     // if(tamperResult & (1 << 6))
     // {
     //     printf("\033[1;31;40mVoltage Tampering Detected\033[0m\n");
-    //     LIB_LCD_Puts(line, 5, FONT1, strlen(tamperMsg7), (UINT8 *)tamperMsg7);
+    //     LIB_LCD_Puts(line, 5, FONT0, strlen(tamperMsg7), (UINT8 *)tamperMsg7);
     //     line++;
     // }
 
-    LIB_LCD_Puts(++line, 7, FONT1, strlen(msg), (UINT8 *)msg);
+    LIB_LCD_Puts(++line, 7, FONT0, strlen(msg), (UINT8 *)msg);
 }
 
 UINT8   Tamper_IsSecureDevice()    //Added by Tammy
@@ -679,7 +682,7 @@ void    Tamper_LoopTest()  //Added by Tammy
         {
             LIB_LCD_Cls();
             printf("\033[1;31;40mNo External Tampering Detected\033[0m\n");
-            LIB_LCD_Puts(2, 5, FONT1, strlen(noTamperMsg), (UINT8 *)noTamperMsg);
+            LIB_LCD_Puts(2, 5, FONT0, strlen(noTamperMsg), (UINT8 *)noTamperMsg);
         }
 
         LIB_WaitTime(100);
@@ -717,9 +720,250 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
     // printf("Funcall PID=0x%x Funcnum=%d\n",PID,FuncNum);
     switch(PID)
     {
+#pragma region //==PRN (printer)==
+        case psDEV_PRN:
+            switch(FuncNum)
+            {
+                API_GRAPH dim;
+                API_PRT_FONT ft;
+                UCHAR *pdata;
+                ULONG FontCodeLen;
+                ULONG FontBmpLen;
+
+                case 1:
+                    ret = api_prt_open(*args, (args + 1));
+                    break;
+
+                case 2:
+                    ret = api_prt_close(*args);
+                    break;
+
+                case 3:
+                    ret = api_prt_status(*args, (args + 1));
+                    optlen = 1;
+                    break;
+
+                case 4:
+                    ret = api_prt_putstring(*args, *(args + 1), args + 2);
+                    break;
+
+                case 5:
+                    memmove(&dim, args + 1, sizeof(API_GRAPH));
+                    pdata = args + 1 + sizeof(API_GRAPH);
+                    ret = api_prt_putgraphics(*args, dim, pdata);
+                    break;
+
+                case 6:
+                    ret = api_prt_setlinespace(*args, *(args + 1));
+                    break;
+
+                case 7:
+                    ret = api_prt_getlinespace(*args, (args + 1));
+                    optlen = 1;
+                    break;
+
+                case 8:
+                    memmove(&ft, args, sizeof(API_PRT_FONT));
+#if 0
+                    memmove(&FontCodeLen, args + sizeof(API_PRT_FONT), 4);
+                    pcode = malloc(FontCodeLen);
+                    for (ULONG i = 0; i < FontCodeLen; i++)
+                        *(pcode + i) = *(args + sizeof(API_PRT_FONT) + 4 + i);
+                    ft.codStAddr = pcode;
+                    ft.codEndAddr = pcode + FontCodeLen - 1;
+                    memmove(&FontBmpLen, args + sizeof(API_PRT_FONT) + 4 + FontCodeLen, 4);
+                    pbmp = malloc(FontBmpLen);
+                    for (ULONG i = 0; i < FontBmpLen; i++)
+                        *(pbmp + i) = *(args + sizeof(API_PRT_FONT) + 4 + FontCodeLen + 4 + i);
+                    ft.bmpStAddr = pbmp;
+                    ft.bmpEndAddr = pbmp + FontBmpLen - 1;
+#endif
+                    ret = api_prt_initfont(ft);
+                    break;
+
+                case 9:
+                    // UCHAR	api_prt_getfont( UCHAR fontid, API_PRT_FONT *ft  )
+                    break;
+
+                default:
+                    break;
+            }
+            break;
+#pragma endregion
+#pragma region //==File System (FS)==
+        case psDEV_FS:
+            switch(FuncNum)
+            {
+                ULONG   length;
+                UCHAR   *ptr;
+                ULONG   fid;
+                int     origin;
+                UINT    type;
+                struct FILE *pFile;
+                struct FILE_DIR *pFdir;
+
+                case 1:
+                    ret = api_fs_select(*args);
+                    break;
+                case 2:
+                    ret = api_fs_init();
+                    break;
+                case 3:
+                    api_fs_format();
+                    break;
+                case 4:
+                    length = *args; // length of file name
+
+                    ret = api_fs2_open(*args, args + 1, &fid);
+                    if(ret == apiOK)
+                    {
+                        *(args + 1 + length + 0) = fid & 0x000000ff;
+                        *(args + 1 + length + 1) = (fid & 0x0000ff00) >> 8;
+                        *(args + 1 + length + 2) = (fid & 0x00ff0000) >> 16;
+                        *(args + 1 + length + 3) = (fid & 0xff000000) >> 24;
+                        optlen = 4;
+                    }
+                    break;
+                case 5:
+                    fid = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    ret = api_fs2_close(fid);
+                    break;
+                case 6:
+                    length = *args;                                                 // length of file name
+                    type = *(args + 1 + length) + *(args + 1 + length + 1) * 0x100; // fileType
+                    ret = api_fs2_create(*args, args + 1, type);
+                    break;
+                case 7:
+                    ret = api_fs2_delete(*args, args + 1);
+                    break;
+                case 8:
+                    //      fp=(FILE *)(args);
+
+                    fid = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    ptr = args + 4;
+                    length = *(ptr + 0) + *(ptr + 1) * 0x100 + *(ptr + 2) * 0x10000 + *(ptr + 3) * 0x1000000;
+
+                    length = api_fs2_read(fid, length, ptr + 4);
+                    if(length != 0xffffffff)
+                    {
+                        *(args + 4) = length & 0x000000ff;
+                        *(args + 5) = (length & 0x0000ff00) >> 8;
+                        *(args + 6) = (length & 0x00ff0000) >> 16;
+                        *(args + 7) = (length & 0xff000000) >> 24;
+                        optlen = 4 + length;
+                        ret = apiOK;
+                    }
+                    else
+                        ret = apiFailed;
+
+                    break;
+                case 9:
+                    //      fp=(FILE *)(args);
+
+                    fid = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    ptr = args + 4;
+                    length = *(ptr + 0) + *(ptr + 1) * 0x100 + *(ptr + 2) * 0x10000 + *(ptr + 3) * 0x1000000;
+
+                    length = api_fs2_write(fid, length, ptr + 4);
+                    //      LIB_DispHexWord( 1, 0, length );
+                    //      LIB_DumpHexData( 0, 2, length+4, args );
+                    if(length != 0xffffffff)
+                    {
+                        //     	optlen=4+length;
+                        ret = apiOK;
+                    }
+                    else
+                        ret = apiFailed;
+
+                    break;
+                case 10:
+                    fid = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    length = *(args + 4) + *(args + 5) * 0x100 + *(args + 6) * 0x10000 + *(args + 7) * 0x1000000;
+                    origin = *(args + 8) + *(args + 9) * 0x100 + *(args + 10) * 0x10000 + *(args + 11) * 0x1000000;
+                    ret = api_fs2_seek(fid, length, origin);
+                    break;
+                case 11:
+                    fid = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    ret = api_fs2_tell(fid, args + 4);
+                    optlen = 4;
+                    break;
+                case 20:
+                    pFile = api_fs_open(args, *(args + strlen(args)));
+                    if(pFile != NULL)
+                    {
+                        memmove(args + strlen(args) + 1, (UCHAR *)pFile, sizeof(struct FILE));
+                        optlen = sizeof(struct FILE);
+                        ret = apiOK;
+                    }
+                    else
+                        ret = apiFailed;
+                    break;
+                case 21:
+                    memmove(pFile, args, sizeof(struct FILE));
+                    api_fs_close(pFile);
+                    ret = apiOK;
+                    break;
+                case 22:
+                    memmove(pFile, args, sizeof(struct FILE));
+                    ptr = args + sizeof(struct FILE);
+                    length = *(ptr + 0) + *(ptr + 1) * 0x100 + *(ptr + 2) * 0x10000 + *(ptr + 3) * 0x1000000;
+                    
+                    length = api_fs_read(pFile, ptr + 4, length);
+                    if(length != 0xffffffff)
+                    {
+                        *(args + sizeof(struct FILE)) = length & 0x000000ff;
+                        *(args + sizeof(struct FILE) + 1) = (length & 0x0000ff00) >> 8;
+                        *(args + sizeof(struct FILE) + 2) = (length & 0x00ff0000) >> 16;
+                        *(args + sizeof(struct FILE) + 3) = (length & 0xff000000) >> 24;
+                        optlen = length;
+                    }
+
+                    memmove(args + sizeof(struct FILE) + 4 + length, pFile, sizeof(struct FILE));
+                    ret = length;
+                    break;
+                case 23:
+                    memmove(pFile, args, sizeof(struct FILE));
+                    ptr = args + sizeof(struct FILE);
+                    length = *(ptr + 0) + *(ptr + 1) * 0x100 + *(ptr + 2) * 0x10000 + *(ptr + 3) * 0x1000000;
+                    
+                    length = api_fs_write(pFile, ptr + 4, length);
+                    if(length != 0xffffffff)
+                    {
+                        *(args + sizeof(struct FILE)) = length & 0x000000ff;
+                        *(args + sizeof(struct FILE) + 1) = (length & 0x0000ff00) >> 8;
+                        *(args + sizeof(struct FILE) + 2) = (length & 0x00ff0000) >> 16;
+                        *(args + sizeof(struct FILE) + 3) = (length & 0xff000000) >> 24;
+                        optlen = length;
+                    }
+
+                    memmove(args + sizeof(struct FILE) + 4 + length, pFile, sizeof(struct FILE));
+                    ret = length;
+                    break;
+                case 24:
+                    memmove(pFile, args, sizeof(struct FILE));
+                    ptr = args + sizeof(struct FILE);
+                    length = *(ptr + 0) + *(ptr + 1) * 0x100 + *(ptr + 2) * 0x10000 + *(ptr + 3) * 0x1000000;
+                    ret = api_fs_seek(pFile, length);
+                    break;
+                case 26:
+                    pFdir = api_fs_directory();
+                    if(pFdir != NULL)
+                    {
+                        memmove(args, (UCHAR *)pFdir, sizeof(struct FILE_DIR));
+                        optlen = sizeof(struct FILE_DIR);
+                        ret = apiOK;
+                    }
+                    else
+                        ret = apiFailed;
+                    break;
+                default:
+                    break;
+            }
+            break;
+#pragma endregion
 #pragma region //==FUNC_OS==
         case psDEV_OS:
-            switch (FuncNum)
+            switch(FuncNum)
             {
                 UINT32 cnt;
 
@@ -736,6 +980,48 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                 case 2:	// void OS_SET_SysTimerFreeCnt( ULONG value );
                     cnt = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
                     OS_SET_SysTimerFreeCnt(cnt);
+                    break;
+                case 3:	// ULONG OS_GET_KbdEventFlag( void );
+                    cnt = OS_GET_KbdEventFlag();
+
+                    *(args + 0) =  cnt & 0x000000ff;
+                    *(args + 1) = (cnt & 0x0000ff00) >> 8;
+                    *(args + 2) = (cnt & 0x00ff0000) >> 16;
+                    *(args + 3) = (cnt & 0xff000000) >> 24;
+      
+                    optlen = 4;
+                    break;
+                case 4:	// void	OS_SET_KbdEventFlag( ULONG value );
+                    cnt = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    OS_SET_KbdEventFlag(cnt);
+                    break;
+                case 5:	// ULONG OS_GET_ScEventFlag( void );
+                    cnt = OS_GET_ScEventFlag();
+
+                    *(args + 0) =  cnt & 0x000000ff;
+                    *(args + 1) = (cnt & 0x0000ff00) >> 8;
+                    *(args + 2) = (cnt & 0x00ff0000) >> 16;
+                    *(args + 3) = (cnt & 0xff000000) >> 24;
+      
+                    optlen = 4;
+                    break;
+                case 6:	// void	OS_SET_ScEventFlag( ULONG value );
+                    cnt = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    OS_SET_ScEventFlag(cnt);
+                    break;
+                case 7:	// ULONG OS_GET_MsrEventFlag( void );
+                    cnt = OS_GET_MsrEventFlag();
+
+                    *(args + 0) =  cnt & 0x000000ff;
+                    *(args + 1) = (cnt & 0x0000ff00) >> 8;
+                    *(args + 2) = (cnt & 0x00ff0000) >> 16;
+                    *(args + 3) = (cnt & 0xff000000) >> 24;
+      
+                    optlen = 4;
+                    break;
+                case 8:	// void	OS_SET_MsrEventFlag( ULONG value );
+                    cnt = *(args + 0) + *(args + 1) * 0x100 + *(args + 2) * 0x10000 + *(args + 3) * 0x1000000;
+                    OS_SET_MsrEventFlag(cnt);
                     break;
                 default:
                     break;
@@ -818,7 +1104,7 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                 API_PCD_ICON        pcdicon;
                 API_LCDTFT_WINBMP   *bmppara;
                 API_LCD_FONT        ft;
-                API_TSC_PARA        para_tsc;
+                API_LCDTFT_RECT     rect;
                 UCHAR               *pdata;
                 UCHAR               *pcode;
                 UCHAR               *pbmp;
@@ -906,31 +1192,9 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     free(pcode);
                     free(pbmp);
                     break;
-                case 11:	// UCHAR api_tsc_open( UCHAR deviceid );
-                    ret = api_tsc_open(*args);
-                    break;
-                case 12:	// UCHAR api_tsc_close( UCHAR dhn );
-                    ret = api_tsc_close(*args);
-                    break;
-                case 13:	// UCHAR api_tsc_status( UCHAR dhn, API_TSC_PARA para, UCHAR *status );
-                    memmove(&para_tsc, args + 1, sizeof(API_TSC_PARA));
-                    status = 0;
-                    ret = api_tsc_status(*args, para_tsc, &status);
-                    *(args + 1 + sizeof(API_TSC_PARA)) = status;
-                    // LIB_DispHexByte( 1, 0, status );
-                    optlen = 1;
-                    break;
-                case 14:	// UCHAR api_tsc_signpad( UCHAR dhn, API_TSC_PARA para, UCHAR *status, UCHAR *palette );
-                    memmove(&para_tsc, args + 1, sizeof(API_TSC_PARA));
-                    ret = api_tsc_signpad(*args, para_tsc, args + 1, args + 1 + sizeof(para_tsc));
-                    optlen = 1;
-                    break;
-                case 15:	// UCHAR api_tsc_getsign( UCHAR dhn, API_TSC_PARA para, UCHAR *status, UCHAR *sign, ULONG *length );
-                    memmove(&para_tsc, args + 1, sizeof(API_TSC_PARA));
-                    ret = api_tsc_getsign(*args, para_tsc, args + 1, args + 6, args + 2);
-                    optlen = 1;
-                    if(ret == apiOK)
-                        optlen += *(args + 2) + *(args + 3) * 0x100 + *(args + 4) * 0x10000 + *(args + 5) * 0x1000000;
+                case 11:
+                    memmove(&rect, args + 1, sizeof(rect));
+                    ret = api_lcdtft_fillRECT(*args, rect);
                     break;
                 default:
                     break;
@@ -941,6 +1205,10 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
         case psDEV_MSR:
             switch(FuncNum)
             {
+                UCHAR   track1len;
+                UCHAR   track2len;
+                UCHAR   track3len;
+
                 case 1:
                     ret = api_msr_open(*args);
                     break;
@@ -953,7 +1221,10 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     break;
                 case 4:
                     ret = api_msr_getstring(*args, args + 1, args + 3);
-                    optlen = *(args + 3) + 1;
+                    track1len = *(args + 3) + 1;
+                    track2len = *(args + 3 + track1len) + 1;
+                    track3len = *(args + 3 + track1len + track2len) + 1;
+                    optlen = track1len + track2len + track3len;
                     break;
                 default:
                     break;
@@ -1042,24 +1313,18 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
             {
                 API_IPCONFIG    config;
                 API_LAN         lan;
-                UCHAR           SizeOfconfig = sizeof(API_IPCONFIG);
-                UCHAR           SizeOflan = sizeof(API_LAN);
                 ULONG           ConnectionTime;
                 
                 case 1:
-                    // memmove(&config, args, SizeOfconfig);
-                    // ret = api_lan_setIPconfig(config);
                     memmove(&config, args, sizeof(API_IPCONFIG));
                     ret = api_lan_setIPconfig(config);
                     break;
                 case 2:
                     ret = api_lan_getIPconfig(&config);
-                    memmove(args, &config, SizeOfconfig);
-                    optlen = SizeOfconfig;
+                    memmove(args, (UCHAR*)&config, sizeof(API_IPCONFIG));
+                    optlen = sizeof(API_IPCONFIG);
                     break;
                 case 3:
-                    // memmove(&lan, args, SizeOflan);
-                    // ret = api_lan_open(lan);
                     memmove(&lan, args, sizeof(API_LAN));
                     ret = api_lan_open(lan);
                     break;
@@ -1162,11 +1427,45 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
         case psDEV_TSC:
             switch(FuncNum)
             {
-                UINT    len;
-                ULONG   length;
+                API_TSC_PARA    para_tsc;
+                UINT            len;
+                ULONG           length;
 
-                case 1:
+                case 1:	// UCHAR api_tsc_open( UCHAR deviceid );
+                    ret = api_tsc_open(*args);
+                    break;
+                case 2:	// UCHAR api_tsc_close( UCHAR dhn );
                     ret = api_tsc_close(*args);
+                    break;
+                case 3:	// UCHAR api_tsc_status( UCHAR dhn, API_TSC_PARA para, UCHAR *status );
+                    memmove(&para_tsc, args + 1, sizeof(API_TSC_PARA));
+                    status = 0;
+                    ret = api_tsc_status(*args, para_tsc, &status);
+                    *(args + 1 + sizeof(API_TSC_PARA)) = status;
+                    // LIB_DispHexByte( 1, 0, status );
+                    optlen = 1;
+                    break;
+                case 4:	// UCHAR api_tsc_signpad( UCHAR dhn, API_TSC_PARA para, UCHAR *status, UCHAR *palette );
+                    memmove(&para_tsc, args + 1, sizeof(API_TSC_PARA));
+                    // ret = api_tsc_signpad(*args, para_tsc, args + 1, args + 1 + sizeof(para_tsc));
+                    ret = api_tsc_signpad(*args, para_tsc, args + 1 + sizeof(para_tsc) + 3, args + 1 + sizeof(para_tsc));
+                    optlen = 1;
+                    break;
+                case 5:	// UCHAR api_tsc_getsign( UCHAR dhn, API_TSC_PARA para, UCHAR *status, UCHAR *sign, ULONG *length );
+                    memmove(&para_tsc, args + 1, sizeof(API_TSC_PARA));
+                    // ret = api_tsc_getsign(*args, para_tsc, args + 1, args + 6, args + 2);
+                    ret = api_tsc_getsign(*args, para_tsc, args + 1 + sizeof(API_TSC_PARA), args + 1 + sizeof(API_TSC_PARA) + 1 + 4, args + 1 + sizeof(API_TSC_PARA) + 1);
+                    // optlen = 1;
+                    optlen = 1 + 4;
+                    if(ret == apiOK)
+                    {
+                        length = *(args + 2 + sizeof(API_TSC_PARA)) + 
+                                 *(args + 2 + sizeof(API_TSC_PARA) + 1) * 0x100 +
+                                 *(args + 2 + sizeof(API_TSC_PARA) + 2) * 0x10000 +
+                                 *(args + 2 + sizeof(API_TSC_PARA) + 3) * 0x1000000;
+                        optlen += length;
+                    }
+                        // optlen += *(args + 2) + *(args + 3) * 0x100 + *(args + 4) * 0x10000 + *(args + 5) * 0x1000000;
                     break;
                 default:
                     break;
@@ -1261,6 +1560,17 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     memmove(&pSram, args, sizeof(API_SRAM));
                     ret = api_sram_PageClear(pSram, *(args + sizeof(API_SRAM)));
                     break;
+                case 7:
+                    ret = api_emvk_PutWaveIEK(args, args + 1 + args[1]);
+                    break;
+                case 8:
+                    ret = api_emvk_GetWaveIMEK(args);
+                    optlen = 1 + CL_IMEK_LEN;
+                    break;
+                case 9:
+                    ret = api_emvk_GetWaveIAEK(args);
+                    optlen = 1 + CL_IAEK_LEN;
+                    break;
                 default:
                     break;
             }
@@ -1338,14 +1648,14 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                 case 5:
                     //prototype:ULONG	api_3des_decipher( UCHAR *pOut, UCHAR *pIn, UCHAR *pKey )
                     //argument order:*pIn(8B) *pKey(24B) *pOut(8 B)
-                    ret = api_3des_decipher(args, args + 32, args + 8);
+                    ret = api_3des_decipher(args + 32, args, args + 8);
                     optlen = 8;
                     break;
                 case 6:
                     //prototype:ULONG	api_3des_decipher2( UCHAR *pOut, UCHAR *pIn, UCHAR *pKey, UCHAR inLen )
                     //argument order:inLen(1B) *pIn(inLen B) *pKey(24B) *pOut(inLen/8 + inLen%8>0?1:0 B)
                     InLength = *args;
-                    ret = api_3des_decipher2(args + 1, args + 1 + InLength + 24, args + 1 + InLength, InLength);
+                    ret = api_3des_decipher2(args + 1 + InLength + 24, args + 1, args + 1 + InLength, InLength);
                     optlen = InLength / 8 + (InLength % 8 > 0) ? 1 : 0;
                     break;
                 case 7:
@@ -1393,14 +1703,15 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     break;
                 case 13:
                     //prototype:ULONG	api_rsa_encrypt( API_RSA cipher )
-                    memmove(&cipher, args, sizeof(ULONG) + 1);
+                    memmove(&cipher.Mode, args, 1);
+                    memmove(&cipher.ModLen, &args[1], sizeof(ULONG));
                     cipher.Modulus = &args[1 + sizeof(ULONG)];
                     memmove(&cipher.ExpLen, &args[1 + sizeof(ULONG) + cipher.ModLen], sizeof(ULONG));
                     cipher.Exponent = &args[1 + sizeof(ULONG) + cipher.ModLen + sizeof(ULONG)];
                     memmove(&cipher.Length, &args[1 + sizeof(ULONG) + cipher.ModLen + sizeof(ULONG) + cipher.ExpLen], sizeof(ULONG));
                     cipher.pIn = &args[1 + sizeof(ULONG) + cipher.ModLen + sizeof(ULONG) + cipher.ExpLen + sizeof(ULONG)];
                     cipher.pOut = &args[1 + sizeof(ULONG) + cipher.ModLen + sizeof(ULONG) + cipher.ExpLen + sizeof(ULONG) + cipher.Length];
-                    memmove(&optlen, cipher.pOut, sizeof(ULONG)); // output length have count already in ap
+                    optlen = cipher.ModLen;
                     ret = api_rsa_encrypt(cipher);
                     break;
                 case 14:
@@ -1461,6 +1772,7 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                 ULONG   length;
                 ULONG   address;
                 UINT    mode;
+                UINT    tout;
 
                 case 1:
                     ret = PED_ReadKeyMode();
@@ -1519,10 +1831,11 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     optlen = 29 + 4;
                     break;
                 case 10:
-                    //prototype:UINT8	PED_AES_DUKPT_GenPinBlock( UINT16 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn )
-                    //argument order:mode(2B) *pan(32B) *epb(16B) *ksn(12B)
-                    memmove(&mode, args, 2);
-                    ret = PED_AES_DUKPT_GenPinBlock(mode, args + 2, args + 34, args + 50);
+                    //prototype:UINT8	PED_AES_DUKPT_GenPinBlock( UINT8 mode, UINT8 *pan, UINT8 *epb, UINT8 *ksn )
+                    //argument order:mode(1B) *pan(32B) *epb(16B) *ksn(12B)
+                    // memmove(&mode, args, 2);
+                    // ret = PED_AES_DUKPT_GenPinBlock(mode, args + 2, args + 34, args + 50);
+                    ret = PED_AES_DUKPT_GenPinBlock(*args, args + 1, args + 33, args + 49);
                     optlen = 28;
                     break;
                 case 11:
@@ -1545,6 +1858,48 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     length = 2 + args[1] + args[2] * 256;
                     ret = CVM_VerifyPIN(*args, NULLPTR, args + 1, args + 1 + length);
 #endif
+                    break;
+                case 13:
+                    //prototype:void	api_ped_SetupPinPad( UCHAR *sbuf )
+                    //argument order:sbuf(sizeof(API_LCDTFT_PARA)B)
+                    api_ped_SetupPinPad(args);
+                    ret = 0;
+                    break;
+                case 14:
+                    //prototype:UCHAR	api_ped_SetPinPadPort( UCHAR port )
+                    //argument order:port(1B)
+                    ret = api_ped_SetPinPadPort(*args);
+                    break;
+                case 15:
+                    //prototype:UCHAR	api_xped_GetPin( UINT tout, UCHAR *amt )
+                    //argument order:tout(2B) *amt(amt[0] + 1B)
+                    tout = *args | *(args + 1) << 8;
+                    ret = api_xped_GetPin(tout, args + 2);
+                    break;
+                case 16:
+                    //prototype:UCHAR	api_xped_GetPin2( UINT tout, UCHAR *amt )
+                    //argument order:tout(2B) *amt(amt[0] + 1B)
+                    tout = *args | *(args + 1) << 8;
+                    ret = api_xped_GetPin2(tout, args + 2);
+                    break;
+                case 17:
+                    //prototype:UINT8	UCHAR	api_xped_GenEncryptedPinBlock( UCHAR algo, UCHAR mode, UCHAR index, UCHAR *pan, UCHAR *epb, UCHAR *ksn )
+                    //argument order:algo(1B) mode(1B) index(1B) *pan(1 + pan[0] B) *epb(8B) *ksn(10B)
+                    length = *(args + 3);
+                    ret = api_xped_GenEncryptedPinBlock(*args, *(args + 1), *(args + 2), args + 3, args + 3 + 1 + length, args + 3 + 1 + length + 8);
+                    optlen = 18;
+                    break;
+                case 18:
+                    //prototype:UCHAR	api_xped_MSKEY_GenPinBlock( UCHAR mode, UCHAR index, UCHAR *pan, UCHAR *epb )
+                    //argument order:mode(1B) index(1B) *pan(1 + pan[0] B) *epb(8B)
+                    length = *(args + 2);
+                    ret = api_xped_MSKEY_GenPinBlock(*args, *(args + 1), args + 2, args + 2 + 1 + length);
+                    optlen = 8;
+                    break;
+                case 19:
+                    //prototype:UCHAR	api_xped_show_MsgID( UCHAR id )
+                    //argument order:id(1B)
+                    ret = api_xped_show_MsgID(*args);
                     break;
                 default:
                     break;
@@ -1584,6 +1939,9 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                 ULONG   length;
                 UCHAR*  data;
                 UCHAR   pattern;
+                ULONG   type;
+                UINT    page;
+                API_FLASH pFls;
 
                 case 1:
                     memmove(&address, args, sizeof(ULONG));
@@ -1596,12 +1954,55 @@ UINT8   IPC_FunctionCaller(OS_IPCSOCKET_HEADER socketHeader, UCHAR *args)
                     memmove(&address, args, sizeof(ULONG));
                     memmove(&length, &args[sizeof(ULONG)], sizeof(ULONG));
                     data = &args[sizeof(ULONG) + sizeof(ULONG)];
-                    ret = FLASH_ReadData((ULONG)address, data, length);
+                    FLASH_ReadData((ULONG)address, data, length);
+                    ret = 0;
                     optlen = length;
                     break;
                 case 3:
                     memmove(&address, args, sizeof(ULONG));
                     ret = FLASH_EraseSector((ULONG)address);
+                    optlen = 0;
+                    break;
+                case 4:
+                    memmove(&type, args, sizeof(ULONG));
+                    ret = api_flash_TypeSelect((ULONG)type);
+                    optlen = 0;
+                    break;
+                case 5:
+                    page = *args | (*(args + 1) << 8);
+                    ret = api_flash_PageSelect(page, args + 2);
+                    optlen = sizeof(API_FLASH_ADDR);
+                    break;
+                case 6:
+                    memmove(&pFls, args, sizeof(API_FLASH));
+                    ret = api_flash_PageLink(pFls, *(args + sizeof(API_FLASH)));
+                    optlen = 0;
+                    break;
+                case 7:
+                    memmove(&pFls, args, sizeof(API_FLASH));
+                    ret = api_flash_PageRead(pFls, args + sizeof(API_FLASH));
+                    optlen = pFls.Len;
+                    break;
+                case 8:
+                    memmove(&pFls, args, sizeof(API_FLASH));
+                    ret = api_flash_PageWrite(pFls, args + sizeof(API_FLASH));
+                    optlen = 0;
+                    break;
+                case 9:
+                    memmove(&pFls, args, sizeof(API_FLASH));
+                    ret = api_flash_PageClear(pFls, *(args + sizeof(API_FLASH)));
+                    optlen = 0;
+                    break;
+                case 10:
+                    memmove(&address, args + 1, sizeof(ULONG));
+                    memmove(&length, args + 1 + 4, sizeof(ULONG));
+                    ret = api_fls_read(*args, address, length, args + 1 + 4 + 4);
+                    optlen = length;
+                    break;
+                case 11:
+                    memmove(&address, args + 1, sizeof(ULONG));
+                    memmove(&length, args + 1 + 4, sizeof(ULONG));
+                    ret = api_fls_write(*args, address, length, args + 1 + 4 + 4);
                     optlen = 0;
                     break;
                 default:
@@ -4246,20 +4647,20 @@ UINT8   SecretInfo_GenRSAKeyPair()
 
 
     LIB_LCD_Cls();
-    LIB_LCD_Puts(0, 0, FONT1, sizeof(os_msg_GEN_RSA_KEY_PAIR), (UINT8 *)os_msg_GEN_RSA_KEY_PAIR);
+    LIB_LCD_Puts(0, 0, FONT0, sizeof(os_msg_GEN_RSA_KEY_PAIR), (UINT8 *)os_msg_GEN_RSA_KEY_PAIR);
     
     //if EDC RSA key pair exist
     if((stat("/home/root/EDC_PUB_KEY.pem", &stbuf) == 0) &&
        (SecretInfo_EdcPrvKeyExists() == TRUE))
     {
-        LIB_LCD_Puts(2, 4, FONT1, sizeof(msg_RSAExist) - 1, (UINT8 *)msg_RSAExist);
+        LIB_LCD_Puts(2, 4, FONT0, sizeof(msg_RSAExist) - 1, (UINT8 *)msg_RSAExist);
 
         if(LIB_WaitKeyMsgYesNoTO(5, COL_LEFTMOST, sizeof(os_msg_Q_RESET), (UINT8 *)os_msg_Q_RESET) == FALSE)
             return apiFailed;
     }    
 
-    LIB_LCD_ClearRow(2, 4, FONT1);
-    LIB_LCD_Puts(2, 4, FONT1, sizeof(msg_genRSAKey) - 1, (UINT8 *)msg_genRSAKey);
+    LIB_LCD_ClearRow(2, 4, FONT0);
+    LIB_LCD_Puts(2, 4, FONT0, sizeof(msg_genRSAKey) - 1, (UINT8 *)msg_genRSAKey);
 
     //Generate RSA key
     bne = BN_new();
@@ -4481,7 +4882,7 @@ void    SecretInfo_writeAuditTrail(UINT8 authStatus)
 
 
     LIB_LCD_Cls();
-    LIB_LCD_Puts(0, 0, FONT1, sizeof(msg_title) - 1, (UINT8 *)msg_title);
+    LIB_LCD_Puts(0, 0, FONT0, sizeof(msg_title) - 1, (UINT8 *)msg_title);
 
     //read current date & time
     api_rtc_getdatetime(dhn_rtc, dbuf);
@@ -4504,22 +4905,22 @@ void    SecretInfo_writeAuditTrail(UINT8 authStatus)
     rtc[14]= ':';
     rtc[15]= dbuf[10];
     rtc[16]= dbuf[11];
-    LIB_LCD_Puts(2, 0, FONT1, 17, rtc);
+    LIB_LCD_Puts(2, 0, FONT0, 17, rtc);
 
     //update?
-    LIB_LCD_Puts(4, 0, FONT1, sizeof(os_msg_Q_UPDATE) - 1, (UINT8 *)os_msg_Q_UPDATE);
+    LIB_LCD_Puts(4, 0, FONT0, sizeof(os_msg_Q_UPDATE) - 1, (UINT8 *)os_msg_Q_UPDATE);
 
     while(1)
     {
         key = LIB_WaitKey();
         if(key == KEY_OK)
         {
-            LIB_LCD_Puts(2, 0, FONT1, sizeof(msg_date_format) - 1, (UINT8 *)msg_date_format);
-            LIB_LCD_ClearRow(3, 2, FONT1);
+            LIB_LCD_Puts(2, 0, FONT0, sizeof(msg_date_format) - 1, (UINT8 *)msg_date_format);
+            LIB_LCD_ClearRow(3, 2, FONT0);
 
             //keyin
             do {
-                LIB_GetNumKey(0, NUM_TYPE_LEADING_ZERO, '_', FONT1, 4, 12, buffer);
+                LIB_GetNumKey(0, NUM_TYPE_LEADING_ZERO, '_', FONT0, 4, 12, buffer);
             } while(TL_CheckDateTime(buffer) != TRUE);
             
             //update
@@ -4547,8 +4948,8 @@ void    SecretInfo_writeAuditTrail(UINT8 authStatus)
                 rtc[15]= dbuf[10];
                 rtc[16]= dbuf[11];
 
-                LIB_LCD_ClearRow(4, 1, FONT1);
-                LIB_LCD_Puts(2, 0, FONT1, 17, rtc);
+                LIB_LCD_ClearRow(4, 1, FONT0);
+                LIB_LCD_Puts(2, 0, FONT0, 17, rtc);
             } while(LIB_GetKeyStatus() == apiNotReady);
 
             LIB_WaitKey();
@@ -4566,8 +4967,8 @@ void    SecretInfo_writeAuditTrail(UINT8 authStatus)
     OS_SECM_PutData(ADDR_DEVICE_AUTH_STATUS, 1, &authStatus);
     OS_SECM_PutData(ADDR_DEVICE_AUTH_DATE_TIME, 12, dbuf);
     
-    LIB_LCD_ClearRow(4, 1, FONT1);
-    LIB_LCD_Puts(4, 0, FONT1, sizeof(os_msg_WRITE_OK), (UINT8 *)os_msg_WRITE_OK);
+    LIB_LCD_ClearRow(4, 1, FONT0);
+    LIB_LCD_Puts(4, 0, FONT0, sizeof(os_msg_WRITE_OK), (UINT8 *)os_msg_WRITE_OK);
 }
 
 // ---------------------------------------------------------------------------
@@ -4587,7 +4988,7 @@ void    SecretInfo_readAuditTrail()
     UINT8   msg_failure[] = {"Validation Result: Failure"};
 
 
-    LIB_LCD_Puts(0, 0, FONT1, sizeof(msg_title) - 1, (UINT8 *)msg_title);
+    LIB_LCD_Puts(0, 0, FONT0, sizeof(msg_title) - 1, (UINT8 *)msg_title);
 
     OS_SECM_GetData(ADDR_DEVICE_AUTH_DATE_TIME, 12, dbuf);
 
@@ -4614,20 +5015,20 @@ void    SecretInfo_readAuditTrail()
     rtc[14]= ':';
     rtc[15]= dbuf[10];
     rtc[16]= dbuf[11];
-    LIB_LCD_Puts(2, 0, FONT1, 17, rtc);
+    LIB_LCD_Puts(2, 0, FONT0, 17, rtc);
 
     OS_SECM_GetData(ADDR_DEVICE_AUTH_STATUS, 1, &authStatus);
     if(authStatus == 1)
-        LIB_LCD_Puts(3, 0, FONT1, sizeof(msg_success) - 1, (UINT8 *)msg_success);
+        LIB_LCD_Puts(3, 0, FONT0, sizeof(msg_success) - 1, (UINT8 *)msg_success);
     else
-        LIB_LCD_Puts(3, 0, FONT1, sizeof(msg_failure) - 1, (UINT8 *)msg_failure);
+        LIB_LCD_Puts(3, 0, FONT0, sizeof(msg_failure) - 1, (UINT8 *)msg_failure);
 
     LIB_WaitKey();
 }
 
 static void DSS_main()
 {
-    UINT8         *text_AS350version = "AS350X6        V1.00";
+    UINT8         *text_AS350version = "AS350PLUS        V1.00";
     UINT8         *text_BSPversion = "READY      BSP 1.0.0";
     UINT8         *text_FunctionNumber = "Function Number:";
     UINT8         buf[4];
@@ -4681,17 +5082,17 @@ static void DSS_main()
             DPA_main();
 #endif
     
-        LIB_LCD_Puts(0, 0, FONT1, strlen(text_AS350version), (UINT8 *)text_AS350version);
-        LIB_LCD_Puts(8-1, 0, FONT1, strlen(text_BSPversion), (UINT8 *)text_BSPversion);
+        LIB_LCD_Puts(0, 0, FONT0, strlen(text_AS350version), (UINT8 *)text_AS350version);
+        LIB_LCD_Puts(8-1, 0, FONT0, strlen(text_BSPversion), (UINT8 *)text_BSPversion);
         LIB_BUZ_Beep1();
 
         while(LIB_WaitKey() != 'y');    //only FUNC key accepted
 
         LIB_LCD_Cls();
 
-        LIB_LCD_Puts(0, 0, FONT1, sizeof(os_msg_FUNCTION), (UINT8 *)os_msg_FUNCTION);
+        LIB_LCD_Puts(0, 0, FONT0, sizeof(os_msg_FUNCTION), (UINT8 *)os_msg_FUNCTION);
 
-        if(LIB_GetNumKey(0, NUM_TYPE_DIGIT, '_', FONT1, 1, 2, buf) == FALSE)
+        if(LIB_GetNumKey(0, NUM_TYPE_DIGIT, '_', FONT0, 1, 2, buf) == FALSE)
             continue;
 
         len = buf[0];
@@ -4705,17 +5106,19 @@ static void DSS_main()
         {
             case 1:
                 //Modified by Tammy, the DSS process should be performed under dual control
-                PED_SetSensitiveServiceTime(TRUE);
-                if(!PED_DualPasswordControl(0))
-                {
-                    PED_SetSensitiveServiceTime(FALSE);
-                    result  = FALSE;
-                }
-                else
-                {
-                    result = api_dss_interface();
-                    PED_SetSensitiveServiceTime(FALSE);
-                }  
+                // PED_SetSensitiveServiceTime(TRUE);
+                // if(!PED_DualPasswordControl(0))
+                // {
+                //     PED_SetSensitiveServiceTime(FALSE);
+                //     result  = FALSE;
+                // }
+                // else
+                // {
+                //     result = api_dss_interface();
+                //     PED_SetSensitiveServiceTime(FALSE);
+                // }
+                //enter the DSS process without dual control (For test)
+                result = api_dss_interface();  
                 break;
 
             case 2:
@@ -4744,9 +5147,26 @@ static void DSS_main()
                 ShowPEDVersions();
                 result = TRUE;
                 break;
+            
+            case 14:
+                result = DIAG_FUNC_TestMsr();
+                break;
 
             case 21:
-                result = DSS_function_LANset();
+                // result = DSS_function_LANset();
+                result = DIAG_FUNC_TestIP();
+                break;
+            
+            case 27:
+                result = DIAG_FUNC_TestTouchScreen();
+                break;
+            
+            case 61:
+                result = DIAG_FUNC_TestSignPad();
+                break;
+
+            case 87:
+                result = SYS_FUNC_SetTscType();
                 break;
 
             case 90:
@@ -4934,12 +5354,12 @@ static void DSS_main()
         if(result == TRUE)
         {
             LIB_BUZ_Beep1();
-            LIB_LCD_Puts(18, 0, FONT1 + attrCLEARWRITE, sizeof(os_msg_OK), (UINT8 *)os_msg_OK);
+            LIB_LCD_Puts(18, 0, FONT0 + attrCLEARWRITE, sizeof(os_msg_OK), (UINT8 *)os_msg_OK);
         }
         else
         {
             LIB_BUZ_Beep2();
-            LIB_LCD_Puts(18, 0, FONT1 + attrCLEARWRITE, sizeof(os_msg_ERROR), (UINT8 *)os_msg_ERROR);
+            LIB_LCD_Puts(18, 0, FONT0 + attrCLEARWRITE, sizeof(os_msg_ERROR), (UINT8 *)os_msg_ERROR);
         }
         
         LIB_WaitTimeAndKey(100); //delay 1.0 sec
@@ -4977,7 +5397,7 @@ int main()
     init_secure_file();
     os_flash_init();
     os_sram_init();
-    flash_ctls_init();
+    // flash_ctls_init();
     
     api_lcdtft_open(0);
     LIB_BUZ_Open();
@@ -4986,6 +5406,11 @@ int main()
     backlight_control_LCDTFT(1,7);
 
     POST_AutoSetMAC();	// 2023-07-17, JAMES
+    POST_FLASH_PageInit();	// init nor flash pages
+    POST_LoadDssVariables(0);	// load DSS parameters
+    api_lan_renewIPconfig();
+    SFS_LoadFsVariables(0);	// load FS parameters
+    FS_RamInit();		// init file system
 
     ShowPEDVersions();
 
@@ -5024,7 +5449,7 @@ int main()
         {
             LIB_LCD_Cls();
             printf("\033[1;31;40mNo External Tampering Detected\033[0m\n");
-            LIB_LCD_Puts(2, 5, FONT1, strlen(noTamperMsg), (UINT8 *)noTamperMsg);
+            LIB_LCD_Puts(2, 5, FONT0, strlen(noTamperMsg), (UINT8 *)noTamperMsg);
         }
 
         LIB_WaitTime(100);
@@ -5052,8 +5477,8 @@ int main()
     Tamper_polling();
 #endif
 
-    dhn_rtc = api_rtc_open();
-    api_rtc_settimezone(dhn_rtc, 0x88); //GMT+8
+    // dhn_rtc = api_rtc_open();
+    // api_rtc_settimezone(dhn_rtc, 0x88); //GMT+8
 
 #if 1
     //enforce to reload SP
@@ -5158,7 +5583,7 @@ int main()
 
     while(1)
     {
-#if 1
+#if 0
         //IPC_client has normal user privilege
         if(0 > sem_trywait(sem_A) )//wait for client signal
         {
@@ -5186,8 +5611,25 @@ int main()
         }
 #else
         //IPC_client has root privilege
-        if(0 > sem_trywait(sem_A) )//wait for client signal 
-        continue;
+        if(0 > sem_trywait(sem_A) )//wait for client signal
+        {
+            if(!isAPRunning)
+            {
+                if(fork() == 0)
+                {
+                    if(execl("/home/AP/IPC_client", NULL) < 0)
+                    {
+                        perror("Failed to execute /home/AP/IPC_client");
+                        exit(0);    //terminates the child process
+                    }
+                }
+
+                isAPRunning = TRUE;
+            }
+
+            usleep(100);
+            continue;
+        }
 #endif
 
 #ifdef _DEBUG_SEMAPHORE_

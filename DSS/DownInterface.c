@@ -36,10 +36,13 @@
 #define		DSS_APP1_BASE		0x10580000		// APP1
 #define		DSS_APP2_BASE		0x10980000		// APP2 (new)
 #define		DSS_APP2_BASE0		0x10700000		// APP2 (old)
-extern UCHAR DssTelNum[23];		//alex 2011/02/22 
-extern UCHAR DssRemoteIP[23];	//alex 2011/02/22 
-extern UCHAR DssRemotePort[23];	//alex 2011/02/22 
-extern UCHAR DssPort[23];		//alex 2011/02/22 
+extern UCHAR DssTelNum[23+1];		//alex 2011/02/22 
+extern UCHAR DssRemoteIP[23+1];		//alex 2011/02/22 
+extern UCHAR DssRemotePort[23+1];	//alex 2011/02/22 
+extern UCHAR DssPort[23+1];		//alex 2011/02/22
+extern UCHAR DssIP[23+1];
+extern UCHAR DssGateway[23+1];
+extern UCHAR DssSubNetMask[23+1];
 extern ULONG     DownburnSize;
 ULONG     DownFileSize;
 ULONG     DownReceiveSize;
@@ -126,7 +129,7 @@ void ShowKey( UCHAR type, UCHAR idle, UCHAR font, UCHAR row, UCHAR *buf )
 
   LIB_LCD_ClearRow( row, 1, font );
 
-  if ( (font & 0x0f) == FONT1 )
+  if ( (font & 0x0f) == FONT0 )
     max_dsp_cnt = MAX_DSP_FONT0_CNT;
   else
     max_dsp_cnt = MAX_DSP_FONT1_CNT;
@@ -374,14 +377,14 @@ UCHAR DownShowSaveInput( const UCHAR *showMessage, UCHAR messageLen, UCHAR *save
   memmove( tempBuf, saveBuffer, sizeof( tempBuf ) );//For internal usage
 
   LIB_LCD_Cls();
-  LIB_LCD_Puts( 0, 0, FONT2, messageLen, (UINT8 *)showMessage );
+  LIB_LCD_Puts( 0, 0, FONT1, messageLen, (UINT8 *)showMessage );
 
   if ( tempBuf[0] !=0 )
     {
 
       //sprintf( ( char * ) &DssTelNum[1], "%.*s", DssTelNum[0], &DssTelNum[1] );
 
-      LIB_LCD_Puts( 3, 21-tempBuf[0], FONT1, tempBuf[0], (UINT8 *)&tempBuf[1] );
+      LIB_LCD_Puts( 3, 21-tempBuf[0], FONT0, tempBuf[0], (UINT8 *)&tempBuf[1] );
 
 
       if ( LIB_WaitKeyYesNo( 4, 0) )
@@ -400,10 +403,10 @@ UCHAR DownShowSaveInput( const UCHAR *showMessage, UCHAR messageLen, UCHAR *save
 ENTER_PHONE:
 
       LIB_LCD_Cls();
-      printf("LCD cls\n");
-      LIB_LCD_Puts( 0, 0, FONT2, messageLen, (UINT8 *)showMessage );
+//    printf("LCD cls\n");
+      LIB_LCD_Puts( 0, 0, FONT1, messageLen, (UINT8 *)showMessage );
 
-      if  ( GetNumKey( 0, leadZero+NUM_TYPE_DEC, '_', FONT1, 3, 21, tempBuf, setDeciPoint ) == FALSE )
+      if  ( GetNumKey( 0, leadZero+NUM_TYPE_DEC, '_', FONT0, 3, 21, tempBuf, setDeciPoint ) == FALSE )
         {
           return apiFailed;
         }
@@ -491,24 +494,26 @@ UCHAR DownLanMenu()
       return apiFailed;
     }
 
-  dssLocalIP[0] = ipconfig->IP_Len;
-  memmove( &dssLocalIP[1], ipconfig->IP, ipconfig->IP_Len );
+  DssIP[0] = ipconfig->IP_Len;
+  if( (DssIP[0] == 0) || (DssIP[0] > 15) )	// 2025-01-07
+    return( apiFailed );
+  memmove( &DssIP[1], ipconfig->IP, ipconfig->IP_Len );
 
-  dssGateway[0] = ipconfig->Gateway_Len;
-  memmove( &dssGateway[1], ipconfig->Gateway, ipconfig->Gateway_Len );
+  DssGateway[0] = ipconfig->Gateway_Len;
+  memmove( &DssGateway[1], ipconfig->Gateway, ipconfig->Gateway_Len );
 
-  dssSubNetMask[0] = ipconfig->SubnetMask_Len;
-  memmove( &dssSubNetMask[1], ipconfig->SubnetMask, ipconfig->SubnetMask_Len);
+  DssSubNetMask[0] = ipconfig->SubnetMask_Len;
+  memmove( &DssSubNetMask[1], ipconfig->SubnetMask, ipconfig->SubnetMask_Len);
 
   //Show Local IP
-  apiStatus =  DownShowSaveInput( down_lan_menu_localip, sizeof(down_lan_menu_localip)-1, dssLocalIP, NUM_TYPE_LEADING_ZERO, 1 );
+  apiStatus =  DownShowSaveInput( down_lan_menu_localip, sizeof(down_lan_menu_localip)-1, DssIP, NUM_TYPE_LEADING_ZERO, 1 );
   if (apiStatus != apiOK)
     {
       return apiStatus;
     }
 
   //Show gateway
-  apiStatus =  DownShowSaveInput( down_lan_menu_gateway, sizeof(down_lan_menu_gateway)-1, dssGateway, NUM_TYPE_LEADING_ZERO, 1 );
+  apiStatus =  DownShowSaveInput( down_lan_menu_gateway, sizeof(down_lan_menu_gateway)-1, DssGateway, NUM_TYPE_LEADING_ZERO, 1 );
   if (apiStatus != apiOK)
     {
       return apiStatus;
@@ -516,16 +521,16 @@ UCHAR DownLanMenu()
 
 
   //Show subnetmask
-  apiStatus =  DownShowSaveInput( down_lan_menu_subnetmask, sizeof(down_lan_menu_subnetmask)-1, dssSubNetMask, NUM_TYPE_LEADING_ZERO, 1 );
+  apiStatus =  DownShowSaveInput( down_lan_menu_subnetmask, sizeof(down_lan_menu_subnetmask)-1, DssSubNetMask, NUM_TYPE_LEADING_ZERO, 1 );
   if (apiStatus != apiOK)
     {
       return apiStatus;
     }
 
 
-  if ( dssLocalIP[0]== ipconfig->IP_Len )
+  if ( DssIP[0]== ipconfig->IP_Len )
     {
-      if ( memcmp( &dssLocalIP[1], ipconfig->IP, dssLocalIP[0]) )
+      if ( memcmp( &DssIP[1], ipconfig->IP, DssIP[0]) )
         {
           ipsetFlag = 1;
         }
@@ -536,9 +541,9 @@ UCHAR DownLanMenu()
     }
 
 
-  if ( dssGateway[0]== ipconfig->Gateway_Len )
+  if ( DssGateway[0]== ipconfig->Gateway_Len )
     {
-      if ( memcmp( &dssGateway[1], ipconfig->Gateway, dssGateway[0]) )
+      if ( memcmp( &DssGateway[1], ipconfig->Gateway, DssGateway[0]) )
         {
           ipsetFlag = 1;
         }
@@ -548,9 +553,9 @@ UCHAR DownLanMenu()
       ipsetFlag = 1;
     }
 
-  if ( dssSubNetMask[0]== ipconfig->SubnetMask_Len )
+  if ( DssSubNetMask[0]== ipconfig->SubnetMask_Len )
     {
-      if ( memcmp( &dssSubNetMask[1], ipconfig->SubnetMask, dssSubNetMask[0]) )
+      if ( memcmp( &DssSubNetMask[1], ipconfig->SubnetMask, DssSubNetMask[0]) )
         {
           ipsetFlag = 1;
         }
@@ -563,18 +568,18 @@ UCHAR DownLanMenu()
   if ( ipsetFlag==1 )
     {
 
-      ipconfig->IP_Len = dssLocalIP[0];
+      ipconfig->IP_Len = DssIP[0];
       //ipconfig.IP = &DssLocalIP[1];
-      memmove( ipconfig->IP, &dssLocalIP[1], dssLocalIP[0] );
+      memmove( ipconfig->IP, &DssIP[1], DssIP[0] );
 
-      ipconfig->Gateway_Len = dssGateway[0] ;
+      ipconfig->Gateway_Len = DssGateway[0];
       // ipconfig.Gateway = &DssGateway[1];
-      memmove( ipconfig->Gateway, &dssGateway[1], dssGateway[0] );
+      memmove( ipconfig->Gateway, &DssGateway[1], DssGateway[0] );
 
 
-      ipconfig->SubnetMask_Len = dssSubNetMask[0];
+      ipconfig->SubnetMask_Len = DssSubNetMask[0];
       // ipconfig.SubnetMask = &DssSubNetMask[1];
-      memmove( ipconfig->SubnetMask, &dssSubNetMask[1], dssSubNetMask[0] );
+      memmove( ipconfig->SubnetMask, &DssSubNetMask[1], DssSubNetMask[0] );
 
 
       apiStatus = api_lan_setIPconfig( ipconfig[0] );
@@ -644,6 +649,8 @@ UCHAR DownLanMenu()
       return apiStatus;
     }
   // OS_FLS_PutData( F_ADDR_DssPort, DssPort_LEN, DssPort );	// 2015-08-05
+  
+  POST_LoadDssVariables(1);		// 2023-09-13, write DSS to file
 
 #endif
 
@@ -727,22 +734,22 @@ UCHAR api_dss_interface()
 	
 MENU:
   LIB_LCD_Cls();
-  LIB_LCD_Puts( 0, 0, FONT2+attrREVERSE, sizeof( dss_menu ), (UINT8 *)dss_menu );
+  LIB_LCD_Puts( 0, 0, FONT1+attrREVERSE, sizeof( dss_menu ), (UINT8 *)dss_menu );
   // printf("sizeof( dss_menu )=%d  ",sizeof( dss_menu ));
 
 SEL_CHANNEL:
 
-  LIB_LCD_ClearRow( 1, 2, FONT2 );
+  LIB_LCD_ClearRow( 1, 2, FONT1 );
 
-  LIB_LCD_Puts( 1, 0, FONT2, sizeof(dss_func1), (UINT8 *)dss_func1 );
+  LIB_LCD_Puts( 1, 0, FONT1, sizeof(dss_func1), (UINT8 *)dss_func1 );
 
 #ifdef	_MODEM_ENABLED_
-  LIB_LCD_Puts( 2, 0, FONT2, sizeof(dss_func2), (UINT8 *)dss_func2 );
+  LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_func2), (UINT8 *)dss_func2 );
 #endif
 
 #ifdef	_LAN_ENABLED_
   if( os_LAN_ENABLED )	// 216-07-06
-    LIB_LCD_Puts( 3, 0, FONT2, sizeof(dss_func3), (UINT8 *)dss_func3 );
+    LIB_LCD_Puts( 3, 0, FONT1, sizeof(dss_func3), (UINT8 *)dss_func3 );
 #endif
 
 ENTER_MENU:
@@ -751,9 +758,9 @@ ENTER_MENU:
 
     case ( '1' ):
     {
-      LIB_LCD_ClearRow( 1, 3, FONT2 );
-      LIB_LCD_Puts( 1, 0, FONT2, sizeof(dss_com0), (UINT8 *)dss_com0 );
-      LIB_LCD_Puts( 2, 0, FONT2, sizeof(dss_com2), (UINT8 *)dss_com2 );
+      LIB_LCD_ClearRow( 1, 3, FONT1 );
+      LIB_LCD_Puts( 1, 0, FONT1, sizeof(dss_com0), (UINT8 *)dss_com0 );
+      LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_com2), (UINT8 *)dss_com2 );
       do{
         result = LIB_WaitKey();
         switch( result )
@@ -783,7 +790,7 @@ ENTER_MENU:
             }
             
           LIB_LCD_Cls();
-          LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_message_successful), (UINT8 *)dss_message_successful );
+          LIB_LCD_Puts( 2, 0, FONT0, sizeof(dss_message_successful), (UINT8 *)dss_message_successful );
           
           SystemRollbackProcess();
           
@@ -791,7 +798,7 @@ ENTER_MENU:
              memcmp(&ReqItem.AID[0], "C_CRT", sizeof("C_CRT")) &&
              memcmp(&ReqItem.AID[0], "C_PRV", sizeof("C_PRV")))
           {
-            LIB_LCD_Puts( 3, 0, FONT1+attrCLEARWRITE, sizeof(dss_message_reboot), (UINT8 *)dss_message_reboot );
+            LIB_LCD_Puts( 3, 0, FONT0+attrCLEARWRITE, sizeof(dss_message_reboot), (UINT8 *)dss_message_reboot );
             softreset();
           }
         }
@@ -811,9 +818,9 @@ ENTER_MENU:
           if ( apiStatus == apiFileError )
             {
               LIB_LCD_Cls();
-              LIB_LCD_Puts( 1, 0, FONT1, sizeof(dss_message_format1)-1,(UINT8 *) dss_message_format1 );
-              LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_message_format2)-1, (UINT8 *)dss_message_format2 );
-              LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+              LIB_LCD_Puts( 1, 0, FONT0, sizeof(dss_message_format1)-1,(UINT8 *) dss_message_format1 );
+              LIB_LCD_Puts( 2, 0, FONT0, sizeof(dss_message_format2)-1, (UINT8 *)dss_message_format2 );
+              LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
               LIB_WaitKey();
             }
           //  SYS_FUNC_SetAppBootStatus();	// 20210219 comment out by west because don't know doing what
@@ -832,7 +839,7 @@ ENTER_MENU:
             }
             
           LIB_LCD_Cls();
-          LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_message_successful), (UINT8 *)dss_message_successful );
+          LIB_LCD_Puts( 2, 0, FONT0, sizeof(dss_message_successful), (UINT8 *)dss_message_successful );
           
           SystemRollbackProcess();
           
@@ -840,7 +847,7 @@ ENTER_MENU:
              memcmp(&ReqItem.AID[0], "C_CRT", sizeof("C_CRT")) &&
              memcmp(&ReqItem.AID[0], "C_PRV", sizeof("C_PRV")))
           {
-            LIB_LCD_Puts( 3, 0, FONT1+attrCLEARWRITE, sizeof(dss_message_reboot), (UINT8 *)dss_message_reboot );
+            LIB_LCD_Puts( 3, 0, FONT0+attrCLEARWRITE, sizeof(dss_message_reboot), (UINT8 *)dss_message_reboot );
             softreset();
           }
         }
@@ -864,9 +871,9 @@ ENTER_MENU:
           if ( apiStatus == apiFileError )
             {
               LIB_LCD_Cls();
-              LIB_LCD_Puts( 1, 0, FONT1, sizeof(dss_message_format1)-1, (UINT8 *)dss_message_format1 );
-              LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_message_format2)-1, (UINT8 *)dss_message_format2 );
-              LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+              LIB_LCD_Puts( 1, 0, FONT0, sizeof(dss_message_format1)-1, (UINT8 *)dss_message_format1 );
+              LIB_LCD_Puts( 2, 0, FONT0, sizeof(dss_message_format2)-1, (UINT8 *)dss_message_format2 );
+              LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
               LIB_WaitKey();
             }
           //  SYS_FUNC_SetAppBootStatus();	// 20210219 comment out by west because don't know doing what
@@ -884,7 +891,7 @@ ENTER_MENU:
             }
             
           LIB_LCD_Cls();
-          LIB_LCD_Puts( 2, 0, FONT1, sizeof(dss_message_successful), (UINT8 *)dss_message_successful );
+          LIB_LCD_Puts( 2, 0, FONT0, sizeof(dss_message_successful), (UINT8 *)dss_message_successful );
           
           SystemRollbackProcess();
           
@@ -892,7 +899,7 @@ ENTER_MENU:
              memcmp(&ReqItem.AID[0], "C_CRT", sizeof("C_CRT")) &&
              memcmp(&ReqItem.AID[0], "C_PRV", sizeof("C_PRV")))
           {
-            LIB_LCD_Puts( 3, 0, FONT1+attrCLEARWRITE, sizeof(dss_message_reboot), (UINT8 *)dss_message_reboot );
+            LIB_LCD_Puts( 3, 0, FONT0+attrCLEARWRITE, sizeof(dss_message_reboot), (UINT8 *)dss_message_reboot );
             softreset();
           }
         }
@@ -1293,8 +1300,8 @@ void* Down_monitor_download_task(void)
 
           
 //        LIB_LCD_Cls();
-          LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_message_present1)-1, (UINT8 *)down_message_present1 );
-          LIB_LCD_Puts( 2, 0, FONT1, sizeof(down_message_present2)-1, (UINT8 *)down_message_present2 );
+          LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_message_present1)-1, (UINT8 *)down_message_present1 );
+          LIB_LCD_Puts( 2, 0, FONT0, sizeof(down_message_present2)-1, (UINT8 *)down_message_present2 );
   printf("DownFileSize=%d\n",DownFileSize);        
   while ( 1 )
     {
@@ -1323,7 +1330,7 @@ void* Down_monitor_download_task(void)
 
 //              LIB_LCD_Cls();
 //              LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_message_present1)-1, (UINT8 *)down_message_present1 );
-              LIB_LCD_Puts( 2, sizeof(down_message_present2)-1, FONT1, sizeof(temp)-1, (UINT8 *)temp );
+              LIB_LCD_Puts( 2, sizeof(down_message_present2)-1, FONT0, sizeof(temp)-1, (UINT8 *)temp );
 
               // NosSleep(50);
 
@@ -1381,8 +1388,8 @@ void Down_monitor_burn_task(void)
           sprintf( ( char * ) temp, "%s%.*s%c", down_message_present2, sizeof( showDigit ) , showDigit, '%' );
 
           LIB_LCD_Cls();
-          LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_message_present1)-1, (UINT8 *)down_message_present1 );
-          LIB_LCD_Puts( 2, 0, FONT1, sizeof(temp)-1, (UINT8 *)temp );
+          LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_message_present1)-1, (UINT8 *)down_message_present1 );
+          LIB_LCD_Puts( 2, 0, FONT0, sizeof(temp)-1, (UINT8 *)temp );
 
           // NosSleep(100);
 
@@ -1440,8 +1447,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
       if( os_DSS_FW )	// 2013-10-22, download M3 firmware
         return( apiOK );
       
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_verify_failed)-1, (UINT8 *)down_verify_failed );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_verify_failed)-1, (UINT8 *)down_verify_failed );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1449,8 +1456,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiEraseFailed):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_erase_failed)-1, (UINT8 *)down_erase_failed );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_erase_failed)-1, (UINT8 *)down_erase_failed );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1458,9 +1465,9 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiFileNotFound):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_File_not_found1)-1, (UINT8 *)down_File_not_found1 );
-      LIB_LCD_Puts( 2, 0, FONT1, sizeof(down_File_not_found2)-1, (UINT8 *)down_File_not_found2 );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_File_not_found1)-1, (UINT8 *)down_File_not_found1 );
+      LIB_LCD_Puts( 2, 0, FONT0, sizeof(down_File_not_found2)-1, (UINT8 *)down_File_not_found2 );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1468,8 +1475,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiTimeOut ):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_timeout)-1, (UINT8 *)down_timeout );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_timeout)-1, (UINT8 *)down_timeout );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1477,8 +1484,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiOffsetError):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_offset)-1, (UINT8 *)down_offset );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_offset)-1, (UINT8 *)down_offset );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1486,8 +1493,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiConnectFailed):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_connect_fail)-1, (UINT8 *)down_connect_fail );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_connect_fail)-1, (UINT8 *)down_connect_fail );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
 
@@ -1496,8 +1503,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiNoLine):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_noline)-1, (UINT8 *)down_noline );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1,(UINT8 *) msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_noline)-1, (UINT8 *)down_noline );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1,(UINT8 *) msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1505,8 +1512,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     case (apiWriteFailed):
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_write_failed)-1, (UINT8 *)down_write_failed );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_write_failed)-1, (UINT8 *)down_write_failed );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
       return apiFailed;
@@ -1515,8 +1522,8 @@ UCHAR DownUi ( UCHAR channel, DOWREQPAC *ReqItem )
     default:
     {
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_failed)-1, (UINT8 *)down_failed );
-      LIB_LCD_Puts( 5, 0, FONT1, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_failed)-1, (UINT8 *)down_failed );
+      LIB_LCD_Puts( 5, 0, FONT0, sizeof(msg_any_key)-1, (UINT8 *)msg_any_key );
       LIB_WaitKey();
 
     }
@@ -1581,7 +1588,7 @@ ContinDownload:
 
 
   LIB_LCD_Cls();
-  LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_connecting)-1, (UINT8 *)down_connecting );
+  LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_connecting)-1, (UINT8 *)down_connecting );
 
   //Create monitor download percentage task
   // pShowTask = NosCreate( Down_monitor_download_task, 7, 0x4000, 0 );
@@ -1596,7 +1603,7 @@ ContinDownload:
     {
       BSP_TMR_Stop( pShowTask );
       LIB_LCD_Cls();
-      LIB_LCD_Puts( 1, 0, FONT1, sizeof(down_complete)-1, (UINT8 *)down_complete );
+      LIB_LCD_Puts( 1, 0, FONT0, sizeof(down_complete)-1, (UINT8 *)down_complete );
       apiStatus = DownVerifyData( channel, ReqItem );
       if ( apiStatus == apiFailed )
         {
@@ -1604,7 +1611,7 @@ ContinDownload:
         }
       else
         {
-          LIB_LCD_Puts( 2, 0, FONT1, sizeof(down_verify_success)-1, (UINT8 *)down_verify_success );
+          LIB_LCD_Puts( 2, 0, FONT0, sizeof(down_verify_success)-1, (UINT8 *)down_verify_success );
         }
       //Refresh RTC
 //    DownRefreshRTC();		// 2012-10-05

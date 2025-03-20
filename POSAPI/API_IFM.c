@@ -139,8 +139,7 @@ void init_default_value(UCHAR dhn, UCHAR protocol){
 
     if(protocol == SIM_PROTOCOL_T1){
         SAM_Driver_data[dhn].bgt = 22;
-//      SAM_Driver_data[dhn].cgt = 0;
-        SAM_Driver_data[dhn].cgt = 1;
+        SAM_Driver_data[dhn].cgt = 0;
         SAM_Driver_data[dhn].cwt = 13;
         SAM_Driver_data[dhn].bwt = 11 + 16 * 960;
         SAM_Driver_data[dhn].wwt = 0;
@@ -153,9 +152,9 @@ void init_default_value(UCHAR dhn, UCHAR protocol){
         // printf("\r\nT=0:init_default_value()\r\n");
 
         SAM_Driver_data[dhn].bgt = 0;
-//      SAM_Driver_data[dhn].cgt = 0;
-        SAM_Driver_data[dhn].cgt = 1;	//1+1+5+10;
-        SAM_Driver_data[dhn].cwt = 9600;
+        SAM_Driver_data[dhn].cgt = 0;
+//      SAM_Driver_data[dhn].cgt = 1;	//1+1+5+10;
+        SAM_Driver_data[dhn].cwt = 43;	//9600;
         SAM_Driver_data[dhn].bwt = 9600;
 //      SAM_Driver_data[dhn].wwt = 13;	//9600; 2023-11-15 (temp solution to shorten APDU response time)
 	SAM_Driver_data[dhn].wwt = 960*10*1;	// WWT=960*WI*D (WI=10, D=1 or 16)
@@ -585,7 +584,8 @@ UCHAR dhn0 = dhn - psDEV_SCR - 0x80;
 
     // check all device close;
     for(i = 0; i < 5; i++){
-        if(SAM_STATUS[dhn0] != SAM_STATUS_CLOSE)
+//      if(SAM_STATUS[dhn0] != SAM_STATUS_CLOSE)
+        if(SAM_STATUS[i] != SAM_STATUS_CLOSE)	// 2025-03-06
             flag = 1;
     }
 

@@ -108,7 +108,7 @@
 #define	NAK					0x15
 #define	ESC					0x1B
 
-#define BSP_MAX_UARTS		3
+#define BSP_MAX_UARTS		3+1		// COM3 for LTE
 
 typedef struct AUX_DATA_S
 {

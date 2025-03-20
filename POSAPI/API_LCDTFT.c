@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "fbutils.h"
+#include "OS_PROCS.h"
 #include "OS_FONT.h"
 #include "POSAPI.h"
 #include "ExtIODev.h"
@@ -12,8 +13,11 @@
 UCHAR SIGNFRAME_WINBMP[] = {
 #include "sign-frame.h"
 };
+
 extern void backlight_control_LCDTFT(UCHAR operation,UCHAR bright); 
 extern UCHAR		SYS_brightness;
+extern ULONG		g_DEBUG;
+
 UCHAR		os_DHN_LCDTFT = 0;
 UCHAR		os_LCDTFT_ATTR = 0;
 
@@ -22,6 +26,8 @@ UCHAR		IS_FRAMEBUFFER_OPENED=0;				//checked framebuffer is opened
 UCHAR		os_LCD_ConvertFont=0;
 UINT32		os_LCDTFT_InUse2;
 ULONG		os_HpCopFlag;
+
+
 // ---------------------------------------------------------------------------
 // FUNCTION: To check if DHN matched.
 // INPUT   : dhn
@@ -72,7 +78,8 @@ int result;
 	free(rx);
 	
 	  
-	os_DHN_LCDTFT = 4;
+	//os_DHN_LCDTFT = 4;
+	os_DHN_LCDTFT = LCD_DID_TFT + psDEV_LCD + 0x80;	// JAMES
 	return( os_DHN_LCDTFT );
 }
 // ---------------------------------------------------------------------------
@@ -149,24 +156,24 @@ API_LCDTFT_PARA para2;
 	    if( OS_LCDTFT_ClrScreen( para ) )
 		{
 			os_LCDTFT_InUse2 = FALSE;
-	      return( apiOK );
-	    }
+	      		return( apiOK );
+	    	}
 		else
 		{
 			os_LCDTFT_InUse2 = FALSE;
-	      return( apiFailed );
+	      		return( apiFailed );
+	    	}
 	    }
-		}
 
 	  OS_FONT_Init(fid);
 	  pFdt = OS_FONT_GetFdtAddr( fid );
 	  memmove( (UINT *)&para2, (UINT *)&para, sizeof(API_LCDTFT_PARA) );
-
-#if	1	// row++ for X6 PCI only (shifted down 1 row)
+	 
+#if	0	// row++ for X6 PCI only (shifted down 1 row)
 	  para.Row += 1;
 	  para2.Row += 1;
 #endif
-
+	  
 	  if( !(font & LCD_ATTR_XYDOT_MASK) )
 	    {
 			para2.Row = para.Row * pFdt->Height;
@@ -195,6 +202,7 @@ API_LCDTFT_PARA para2;
 	  return( apiFailed );
 }
 
+// ---------------------------------------------------------------------------
 //UCHAR	api_lcdtft_putstring( UCHAR dhn, UCHAR *sbuf, UCHAR *dbuf )
 UCHAR api_lcdtft_putstring( UCHAR dhn, API_LCDTFT_PARA para, UCHAR *dbuf )
 {
@@ -208,8 +216,15 @@ ULONG	len;
 
 UCHAR	attr = 0;
 OS_FDT	*pFdt = 0;
+OS_FDT	*pFdt1 = 0;
 API_LCDTFT_PARA para2;
-//API_LCDTFT_PARA para;
+API_LCDTFT_PARA para1;
+
+UCHAR	first;
+UINT	pixrow;
+UINT	pixcol;
+
+
 	//memmove( &para, sbuf, sizeof(API_LCDTFT_PARA) );
 	if( LCDTFT_CheckDHN( dhn ) == FALSE )
 	  return( apiFailed );
@@ -225,19 +240,22 @@ API_LCDTFT_PARA para2;
 	fid = font & 0x0F;	// fid
 	attr = font & 0xF0;	// attr
 	memmove( (UINT *)&para2, (UINT *)&para, sizeof(API_LCDTFT_PARA) );
+	memmove( (UINT *)&para1, (UINT *)&para, sizeof(API_LCDTFT_PARA) );
 
-#if	1	// row++ for X6 PCI only (shifted down 1 row)
+#if	0	// row++ for X6 PCI only (shifted down 1 row)
+	para1.Row += 1;
 	para2.Row += 1;
 #endif
-
+	  
 	// printf("font=0x%02x\n",font);
 	os_LCDTFT_ATTR = font & 0xF0;
 	// printf("para.FontHeight=%d  para.FontWidth=%d\n",para2.FontHeight,para2.FontWidth);
 	pFdt = OS_FONT_GetFdtAddr( fid );
-	para2.Font=		pFdt->FontID;
-	//len=			pFdt->ByteNo;		
+	para2.Font=pFdt->FontID + attr;
 	para2.FontHeight=pFdt->Height;
 	para2.FontWidth=pFdt->Width;
+
+#if	0	// JAMES
 	// printf("pFdt->Height=%d  pFdt->Width=%d",pFdt->Height,pFdt->Width);
 	// printf("para.FontHeight=%d  para.FontWidth=%d\n",para2.FontHeight,para2.FontWidth);
 	if(os_LCDTFT_ATTR<LCD_ATTR_XYDOT_MASK){//if pixel cursor not enable
@@ -248,13 +266,16 @@ API_LCDTFT_PARA para2;
 	}
 	else
 		os_LCDTFT_ATTR-=LCD_ATTR_XYDOT_MASK;
-		
+#endif
+	
 	if(!IS_FRAMEBUFFER_OPENED){//if framebuffer not opened.
 		return( apiDeviceNotOpen );
 	}
 	
-	if( os_LCDTFT_ATTR >= LCD_ATTR_CLEARWRITE_MASK )	// clear before writing?
-	  {	  
+//	if( os_LCDTFT_ATTR >= LCD_ATTR_CLEARWRITE_MASK )	// clear before writing?
+	if( os_LCDTFT_ATTR & LCD_ATTR_CLEARWRITE_MASK )
+	  {
+#if	0 	// JAMES
 	  memmove( (UINT *)&para, (UINT *)&para2, sizeof(API_LCDTFT_PARA) );
 	  para2.Col=pFdt->Height;
 	  while(os_LCDTFT_InUse2);//20210911 add by west. Wait untill another process done of framebuffer manipulating
@@ -265,8 +286,23 @@ API_LCDTFT_PARA para2;
 	  memmove( (UINT *)&para2, (UINT *)&para, sizeof(API_LCDTFT_PARA) );
 	  os_LCDTFT_InUse2 = FALSE;
 	  os_LCDTFT_ATTR-=LCD_ATTR_CLEARWRITE_MASK;
+#else
+//	  para1.Col = 1;
+//	  api_lcdtft_clear( dhn, para1 );
+	  
+	  if( os_LCDTFT_ATTR & LCD_ATTR_XYDOT_MASK )	// 2025-02-18
+	    {
+	    para1.Row *= 2;
+	    para1.Col = para1.FontHeight;
+	    }
+	  else
+	    para1.Col = 1;
+	  api_lcdtft_clear( dhn, para1 );
+#endif
 	  }
-	if( os_LCDTFT_ATTR == LCD_ATTR_REVERSE_MASK )
+	  
+//	if( os_LCDTFT_ATTR == LCD_ATTR_REVERSE_MASK )
+	if( os_LCDTFT_ATTR & LCD_ATTR_REVERSE_MASK )
 	  {
 	  data = para2.BG_Palette[0];
 	  para2.BG_Palette[0] = para2.FG_Palette[0];
@@ -282,21 +318,55 @@ API_LCDTFT_PARA para2;
 	  }
 	// if(fid==FONT_0)
 	
+	// JAMES, To support pixel column solution
+	if( (attr & attrISO) && (fid == FONT1) )	// X6 extended font (FONT0 8x16 --> 16x32)
+	  {
+	  para2.FontHeight = 32;
+	  para2.FontWidth  = 16;
+	  }
+	OS_LCDTFT_SetCharCursor( &first, para2.Font, para2.Row, para2.Col, para2.FontHeight, para2.FontWidth, pFdt->Width, &pixrow, &pixcol );  
+	para2.Row = pixrow;
+	para2.Col = pixcol;
+	
 	os_HpCopFlag=1;
 	while(os_LCDTFT_InUse2);//20210911 add by west. Wait untill another process done of framebuffer manipulating
 	os_LCDTFT_InUse2 = TRUE;
 	if( os_HpCopFlag ){
-	  if( (*pData)>0x9F || para2.Font==FONT2 || para2.Font==FONT4 || para2.Font==FONT12)
+	  if( (*pData)>0x9F || (para2.Font & 0x0F)==FONT2 || (para2.Font & 0x0F)==FONT4 || (para2.Font & 0x0F)==FONT12)
 	    {
-			// printf("para2.Font=%d\n",para2.Font);
+	    rotation=ROTATE_0;//int8_t rotation from fbutils-linux.c
+	    OS_LCDTFT_PutBG5Str(pData,para2,len);
+/*
+	  	// JAMES
+	  	if( *pData <= 0x9F )
+	  	  {
+	  	  memmove( &para1, &para2, sizeof(API_LCDTFT_PARA) );
+		  if( fid >= LCDTFT_FONT2 )
+		    {
+		    pFdt1 = OS_FONT_GetFdtAddr( LCDTFT_FONT1 );
+		    para1.Font = pFdt1->FontID + attr;
+        	    para1.FontHeight = pFdt1->Height;
+        	    para1.FontWidth  = pFdt1->Width;
+        	    
+        	    rotation=ROTATE_0;//int8_t rotation from fbutils-linux.c
+        	    OS_LCDTFT_PutBG5Str(pData,para1,len);
+		    }
+		   }
+		  else
+		   {
+			// printf("\rpara2.Font=%d\n",para2.Font);
 			// printf("para.FontHeight=%d  para.FontWidth=%d\n",para2.FontHeight,para2.FontWidth);
 			rotation=ROTATE_0;//int8_t rotation from fbutils-linux.c
 			OS_LCDTFT_PutBG5Str(pData,para2,len);
-		}
-	  else{
+		   }
+*/
+	      }
+	  else{		  
+		  //if( g_DEBUG )
+		  //  printf("\rROW=%x, COL=%x\n", para2.Row, para2.Col );
 		  rotation=ROTATE_0;//int8_t rotation from fbutils-linux.c
 		  OS_LCDTFT_PutStr( pData, para2,len );
-	  }
+	      }
 	}
 	os_LCDTFT_InUse2 = FALSE;
 	// printf("API printstring done\n");
@@ -329,20 +399,28 @@ API_LCDTFT_PARA para2;
 //UCHAR	api_lcdtft_putgraphics( UCHAR dhn, API_LCDTFT_GRAPH *sbuf )
 UCHAR	api_lcdtft_putgraphics( UCHAR dhn, API_LCDTFT_GRAPH graph)
 {
+UCHAR	result;
+
 	//API_LCDTFT_GRAPH graph;
 	//memmove( &graph, sbuf, sizeof(API_LCDTFT_GRAPH) );
 	if( LCDTFT_CheckDHN( dhn ) == FALSE )
 	  return( apiFailed );
 	  while(os_LCDTFT_InUse2);//20210911 add by west. Wait untill another process done of framebuffer manipulating
-	  os_LCDTFT_InUse2 = TRUE;
-	OS_LCDTFT_PutGraphics( graph );
+	  
+	os_LCDTFT_InUse2 = TRUE;
+	result = OS_LCDTFT_PutGraphics( graph );
 	os_LCDTFT_InUse2 = FALSE;
-	return( apiOK );
+	
+	if( result != apiOK )
+	  result = apiFailed;
+	  
+	return( result );
 }
 //UCHAR	api_lcdtft_showICON( UCHAR dhn, API_LCDTFT_ICON *sbuf )
 UCHAR   api_lcdtft_showICON( UCHAR dhn, API_LCDTFT_ICON icon )
 {
 //API_LCDTFT_ICON icon;
+UCHAR	result;
 
 
 	//memmove( &icon, sbuf, sizeof(API_LCDTFT_ICON) );
@@ -354,9 +432,10 @@ UCHAR   api_lcdtft_showICON( UCHAR dhn, API_LCDTFT_ICON icon )
 	}
 	while(os_LCDTFT_InUse2);//20210911 add by west. Wait untill another process done of framebuffer manipulating
 	os_LCDTFT_InUse2 = TRUE;
-	OS_LCDTFT_ShowICON( icon );  
+	result = OS_LCDTFT_ShowICON( icon );  
 	os_LCDTFT_InUse2 = FALSE;
-	return( apiOK );
+	
+	return( result );
 }
 // ---------------------------------------------------------------------------
 // FUNCTION: To control related graphics appearance for PCD application,
@@ -518,8 +597,8 @@ API_LCDTFT_PARA para2;
 	
 	if( font & LCD_ATTR_CLEARWRITE_MASK )	// clear before writing?
 	  {	  
-		  while(os_LCDTFT_InUse2);//20210911 add by west. Wait untill another process done of framebuffer manipulating
-	  os_LCDTFT_InUse2 = TRUE;
+		while(os_LCDTFT_InUse2);//20210911 add by west. Wait untill another process done of framebuffer manipulating
+	  		os_LCDTFT_InUse2 = TRUE;
 		if( ccw == CCW_90 )
 			rotation=ROTATE_90;
 		else if( ccw == CCW_270 )

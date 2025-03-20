@@ -9,7 +9,7 @@
 #include "DEV_MEM.h"
 
 
-#define FLASG_PAGE_SECTOR_SIZE 128 * 1024
+#define FLASH_PAGE_SECTOR_SIZE 128 * 1024
 
 static struct dev_mem_info system_back_up;
 
@@ -82,7 +82,7 @@ void OS_FLS_GetData( UINT32 addr, UINT32 len, UINT8 *data ){
 
 /**
  *    this function is used to clear the memory to 0 
- *     from Sectorbase of size FLASG_PAGE_SECTOR_SIZE
+ *     from Sectorbase of size FLASH_PAGE_SECTOR_SIZE
  *    @param[in] SectorBase           the start address to be clear
  *    @return error code
  *    @retval apiOK                    clear success
@@ -90,6 +90,6 @@ void OS_FLS_GetData( UINT32 addr, UINT32 len, UINT8 *data ){
  */ 
 UINT32 FLASH_EraseSector( UINT32 SectorBase ) {
 
-    return mem_clear(&system_back_up, SectorBase, FLASG_PAGE_SECTOR_SIZE, 0);
+    return mem_clear(&system_back_up, SectorBase, FLASH_PAGE_SECTOR_SIZE, 0);
 
 }

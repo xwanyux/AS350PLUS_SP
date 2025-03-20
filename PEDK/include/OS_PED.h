@@ -200,6 +200,8 @@ extern	UINT32	PED_VerifyAccDEK(void);
 extern	UINT8	PED_VerifyFPEKey(void);
 extern	UINT8	PED_VerifyKeyStatus(void);
 extern	UINT8	PED_ShowTSN(UCHAR *tsn);
+extern  UINT32	PED_SetStateDHCP(UINT16 flag);
+extern  UINT32	PED_GetStateDHCP(void);
 
 extern	UINT8	PED_ADMIN_DeletePedKey(void);
 extern	UINT8	PED_ADMIN_SetKeyBlockProtectionKey(UINT8 type);

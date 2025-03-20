@@ -28,6 +28,7 @@ int MDM_fd=0;
 // volatile	UINT32	os_SysTimerFreeCnt=0;
 UINT32	os_SysTimerFreeCnt=0;
 UINT32	os_SysTimer_TscDownCnt=0;
+UINT32	os_SysTimerFreeCnt_LTE = 0;
 // ADD by Wayne 2020/09/04
 extern ULONG global_counter_pmu_poweroff;
 extern ULONG global_counter_pmu_backlite_off;
@@ -39,6 +40,8 @@ extern UCHAR global_Backlight_off_LCD;
 
 extern void	OS_PCD_LED_Task();
 extern void	OS_PED_Task( void );
+// extern void	OS_PMU_SwitchScan( void );
+extern void	LAN_Session_Control_Task( void );
 extern void	OS_LAN_ConnectionTimeTask( void );
 
 extern UCHAR PRN_status;//to know if printer running
@@ -53,12 +56,12 @@ void OS_Timer1Int( uint64_t count )
 	//OS_KBD_Scan();			// normal keypad scan
 //	OS_KBD_SecureScan();		// secure keypad scan
 	
-	// OS_AUX_FlowControl();		// AUX flow control
+	OS_AUX_FlowControl();		// AUX flow control (2025-02-04, using old AS350 method)
 	
 	OS_PED_Task();				//from OS_PED2.c. Timer for PED service 
 	//OS_KBD_BL_Task();		// KBD backlight
 
-	//OS_PMU_SwitchScan();		// scan AGM power switch
+	// OS_PMU_SwitchScan();		// scan AGM power switch
 	
 	//OS_PMU_TimeTick_Task();		//
 	
@@ -75,6 +78,7 @@ void OS_Timer1Int( uint64_t count )
 	// os_SysTimerFreeCnt++;
 	os_SysTimerFreeCnt+=count;//20210830 modified bt west
 	os_SysTimer_TscDownCnt+=count;
+	os_SysTimerFreeCnt_LTE += count;
 
 	//ADD by Wayne 2020/09/04
 	// if(global_counter_pmu_poweroff > 0)

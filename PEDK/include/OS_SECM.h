@@ -610,6 +610,18 @@
 #define ADDR_CLIENT_PRV_KEY_END     ADDR_CLIENT_PRV_KEY + CLIENT_PRV_KEY_SLOT_LEN          // 2L-V
 
 //----------------------------------------------------------------------------
+//	DHCP
+//	0xFFFF or 0x0000	= disable DHCP
+//	0x0001			    = enable DHCP
+//----------------------------------------------------------------------------
+#define	DHCP_FLAG_ENABLE		0x0001
+#define	DHCP_FLAG_DISABLE		0x0000
+#define	DHCP_FLAG_LEN			2
+
+#define	ADDR_DHCP_FLAG			ADDR_CLIENT_PRV_KEY_END
+#define	ADDR_DHCP_FLAG_END		ADDR_DHCP_FLAG + DHCP_FLAG_LEN
+
+//----------------------------------------------------------------------------
 //	File Structure
 //----------------------------------------------------------------------------
 typedef struct FILE_INFO_S

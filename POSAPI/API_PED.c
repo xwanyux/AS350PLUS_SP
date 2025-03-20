@@ -24,8 +24,12 @@
 #include "POSAPI.h"
 #include "DEV_PED.h"
 #include "PEDAPI.h"
+#include "LCDTFTAPI.h"
 
 #include "MPU.h"
+
+extern	API_LCDTFT_PARA	os_ped_EMVSignPadPara;		// defined in PEDK.OS_PED2.c
+UCHAR	g_dhn_ped;
 
 
 // ---------------------------------------------------------------------------
@@ -399,5 +403,58 @@ UCHAR	result;
 
 	MPU_SwitchToUserMode();
 
+	return( result );
+}
+
+// -------------------------------------------------------------------------------------------------
+// FUNC  : Setup parameters for AS350 internal PIN entry function.
+// INPUT : row	   - row number of display for PIN entry.
+//	       col	   - beginning column number of display for PIN entry.
+//	       palette - fixed 3 bytes palette values of RGB.
+// OUTPUT: none.
+// RETURN: none.
+// NOTE  : This function is to be implemented from AP level.
+// -------------------------------------------------------------------------------------------------
+void	api_ped_SetupPinPad( UCHAR *sbuf )
+{
+	memmove( &os_ped_EMVSignPadPara, sbuf, sizeof(API_LCDTFT_PARA) );
+}
+
+// ---------------------------------------------------------------------------
+// FUNC  : set COM port for external pin pad device.
+// INPUT : port
+// OUTPUT: 
+// RETURN: emvOK
+//         emvFailed (invalid port number)
+// NOTE  : This function should be called before api_emvk_CardholderVerification().
+// ---------------------------------------------------------------------------
+UCHAR	api_ped_SetPinPadPort( UCHAR port )
+{
+UCHAR	result = apiOK;
+
+
+	switch( port )	// 2016-10-11
+	      {
+	      case COM0:
+	      	
+	      	   g_dhn_ped = 0x88;
+	      	   break;
+	      	   
+	      case COM1:
+	      	
+	      	   g_dhn_ped = 0x89;
+	      	   break;
+	      	   
+	      case COM2:
+	      	
+	      	   g_dhn_ped = 0x8A;
+	      	   break;
+	      	   
+	      default:	// COM0
+	      	
+	      	   result = apiFailed;
+	      	   break;
+	      }
+	      
 	return( result );
 }

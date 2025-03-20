@@ -24,7 +24,7 @@
 #define UART_MODE_IRQ		2
 #define UART_MODE_DMA		3
 
-#define BSP_MAX_UARTS		3
+#define BSP_MAX_UARTS		3+1	// COM3 for LTE
 
 
 #define UART0_BASE			0xFFFE0000
@@ -45,6 +45,7 @@
 #define BSP_UART_0         0
 #define BSP_UART_1         1
 #define BSP_UART_2         2
+#define BSP_UART_3         3		// COM3 for LTE
 
 /*
  * GPIO pins available for Uart function:
@@ -79,6 +80,7 @@
 #define BSP_UART_0         0
 #define BSP_UART_1         1
 #define BSP_UART_2         2
+#define BSP_UART_3         3		// COM3 for LTE
 
 
 

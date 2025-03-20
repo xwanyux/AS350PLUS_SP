@@ -441,8 +441,8 @@ UCHAR page_read_or_write(struct page_system_info *info, UCHAR * pData, UCHAR fla
         
     }
 
-    // if(flag == WRITE)
-    //     sync();
+    if(flag == WRITE)
+        sync();
     return apiOK;
 
 }

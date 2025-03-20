@@ -71,6 +71,7 @@
 #define		FLSID_PARA			1
 #define		FLSID_IMEK			2
 #define		FLSID_IAEK			3
+#define		FLSID_DATA			4
 
 #define		FLSType_SRAM		0
 #define		FLSType_Flash		1

@@ -359,7 +359,10 @@ UINT16		flag;
 			else if(UartNum==COM1)
 				fd = open("/dev/ttymxc1", flag);
 			else if(UartNum==COM2)
-				fd = open("/dev/ttymxc3", flag);
+			//	fd = open("/dev/ttymxc3", flag);
+				fd = open("/dev/ttymxc2", flag);	// 2023-04-25, M6
+			else if(UartNum==COM3)
+				fd = open("/dev/ttymxc3", flag);	// 2023-07-11, M6 for LTE (L610)
 			else
 				return( pUart );
 			
@@ -384,6 +387,10 @@ UINT16		flag;
 				case COM2:
 
 					pUart->UartNum=2;
+					break;
+				case COM3:
+
+					pUart->UartNum=3;
 					break;
 				default:
 					return(pUart);
@@ -604,6 +611,7 @@ BSP_UART_Release
 	return( Status );
 }
 
+#if	0	// 2023-02-11, re-defined in DBTOOL.c
 void	_DEBUGPRINTF( char *Msg, ... )
 {
 char PrintfBuffer[300];
@@ -613,6 +621,8 @@ char PrintfBuffer[300];
 	va_end(list_ptr);
 	// printf("%s",PrintfBuffer);
 }
+#endif
+
 UINT8 BSP_UART_SendAck( UINT8 dhn, UINT8 acknum)
 {
 UINT8 ackbuf=0x06;

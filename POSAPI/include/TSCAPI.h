@@ -82,6 +82,7 @@ extern	UCHAR	api_tsc_close( UCHAR dhn );
 extern	UCHAR	api_tsc_status( UCHAR dhn, API_TSC_PARA para, UCHAR *STATUS );
 extern	UCHAR	api_tsc_signpad( UCHAR dhn, API_TSC_PARA para, UCHAR *status, UCHAR *palette );
 extern	UCHAR	api_tsc_getsign( UCHAR dhn, API_TSC_PARA para, UCHAR *status, UCHAR *sign, ULONG *length );
+extern  UCHAR	apk_tsc_switch( UCHAR flag );
 
 //----------------------------------------------------------------------------
 #endif

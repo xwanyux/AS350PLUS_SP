@@ -341,7 +341,7 @@ UINT8	lrc = 0;
 	                break;
 	           
 	           case AUX_STATE_LRC:
-	      			printf("data=%d  lrc=%d\n",data,lrc);
+//	      			printf("data=%d  lrc=%d\n",data,lrc);
 	                if( data == lrc )				// good LRC (ACK will be sent after API reading)
 	                  {
 	                  os_AUX_RxDataBuffer[pUart->UartNum].Len = DataLen;	// put LEN & DATA without leading header

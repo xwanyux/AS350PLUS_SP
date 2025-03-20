@@ -63,8 +63,13 @@ ULONG api_flash_init(void){
     if(result != apiOK)
         return result;
 
+#if	0
     page_nor_flash.page_num = 1; // 1024
     page_nor_flash.page_size = 16 * 1024 * 1024; // 128K
+#else
+    page_nor_flash.page_num = 128;		// 2023-08-07, create 128 nor flash pages, (default linked: 0..126, system used: 127)
+    page_nor_flash.page_size = 128 * 1024;
+#endif
     page_nor_flash.system_name = "nor_flash";
 
     result = page_system_init(&page_nor_flash);

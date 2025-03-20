@@ -7,6 +7,9 @@
 #define	SPI_12MHz	12000000
 #define	SPI_10MHz	10000000
 #define	SPI_8MHz	8000000
+
+#define	PCD_PLATFORM_CLRC663
+
 /* 20220810 add function which is change chip select pin status with ioctl*/
 #define SPI_IOC_CS_PIN		_IOW(SPI_IOC_MAGIC, 6, __u32)
 // #define	SPI_10MHz	25000000

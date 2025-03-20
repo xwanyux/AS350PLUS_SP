@@ -31,15 +31,29 @@
 //----------------------------------------------------------------------------
 //		Default Display Font ID
 //----------------------------------------------------------------------------
+#if	1	// JAMES
+
 #define		LCDTFT_FONT0			FONT0		//
 #define		LCDTFT_FONT1			FONT1		//
 #define		LCDTFT_FONT2			FONT2		//
 #define		LCDTFT_FONT3			FONT13		// printer font   (32x32, 10 row x 20 col, Chinese)
 #define		LCDTFT_FONT4			FONT14		// lcdtft  font   (16x16, 20 row x 15 col, Chinese)
 
+#else
+
+#define		LCDTFT_FONT0			FONT10		// printer font 0 (8x16 , 20 row x 30 col, ASCII)
+#define		LCDTFT_FONT1			FONT11		// printer font 1 (12x24, 13 row x 20 col, ASCII)
+#define		LCDTFT_FONT2			FONT12		// printer font 2 (24x24, 13 row x 20 col, Chinese)
+#define		LCDTFT_FONT3			FONT13		// printer font   (32x32, 10 row x 20 col, Chinese)
+#define		LCDTFT_FONT4			FONT14		// lcdtft  font   (16x16, 20 row x 15 col, Chinese)
+
+#endif
+
 //----------------------------------------------------------------------------
 //		Default Display Font Size
 //----------------------------------------------------------------------------
+#if	0	// JAMES
+
 #define		TFTLCD_FONT0_W			6
 #define		TFTLCD_FONT0_H			8
 
@@ -72,6 +86,44 @@
 
 #define		FONT12_W		12
 #define		FONT12_H		24
+
+#else
+
+#define		TFTLCD_FONT0_W			8
+#define		TFTLCD_FONT0_H			16
+
+#define		TFTLCD_FONT1_W			12
+#define		TFTLCD_FONT1_H			24
+
+#define		TFTLCD_FONT2_W			24
+#define		TFTLCD_FONT2_H			24
+
+#define		TFTLCD_FONT3_W			32
+#define		TFTLCD_FONT3_H			32
+
+#define		TFTLCD_FONT4_W			16
+#define		TFTLCD_FONT4_H			16
+
+#define		FONT0_W			8
+#define		FONT0_H			16
+
+#define		FONT1_W			12
+#define		FONT1_H			24
+
+#define		FONT2_W			24
+#define		FONT2_H			24
+
+#define		FONT3_W			32
+#define		FONT3_H			32
+
+#define		FONT4_W			16
+#define		FONT4_H			16
+
+#define		FONT12_W		12
+#define		FONT12_H		24
+
+#endif
+
 //----------------------------------------------------------------------------
 //		RGB Mode
 //----------------------------------------------------------------------------

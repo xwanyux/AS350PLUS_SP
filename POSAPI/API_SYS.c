@@ -53,6 +53,11 @@ char devID[]="1782 4d10 ff";
     // write(opResult,devID,sizeof(devID));
     // close(opResult);
     #endif
+    
+    EXTIO_GPIO(_NFC_RESET_BANK_ADDR,_NFC_RESET_GPIO_PORT,_NFC_RESET_GPIO_NUM,1);	// 2025-01-08, reset RC663 (HI)
+    EXTIO_GPIO(_NFC_RESET_BANK_ADDR,_NFC_RESET_GPIO_PORT,_NFC_RESET_GPIO_NUM,0);	// 2025-01-08, reset RC663 (LO)
+    
+    EXTIO_GPIO(_MSR_PWDN_BANK_ADDR,_MSR_PWDN_GPIO_PORT,_MSR_PWDN_GPIO_NUM,1);	// 2025-02-25, MSR power-down (HI) to disable
 }
 /**
  *    this function is used to calculate hash function for linux kernel using netlink.

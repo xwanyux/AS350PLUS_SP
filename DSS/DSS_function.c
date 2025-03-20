@@ -62,7 +62,7 @@ UINT32	SYS_FUNC_KeyManagementSystem( void )
 
         //This device has not been authenticated yet
         LIB_LCD_Cls();
-        LIB_LCD_Puts(2, 8, FONT1, sizeof(msg_unauth) - 1, (UINT8 *)msg_unauth);
+        LIB_LCD_Puts(2, 8, FONT0, sizeof(msg_unauth) - 1, (UINT8 *)msg_unauth);
         LIB_WaitTime(300);
         return FALSE;
     }
@@ -71,14 +71,14 @@ UINT32	SYS_FUNC_KeyManagementSystem( void )
 	while(1)
 	{
 		LIB_LCD_Cls();
-		LIB_LCD_Puts(0, 0, FONT1, sizeof(os_msg_SELECT), (UINT8 *)os_msg_SELECT);
+		LIB_LCD_Puts(0, 0, FONT0, sizeof(os_msg_SELECT), (UINT8 *)os_msg_SELECT);
 
 		buffer[0] = 1;	// starting row number
 		buffer[1] = 16;	// max lcd row cnt
 		buffer[2] = 15;	// list items
 		buffer[3] = 25;	// item length
 		buffer[4] = 0;	// offset of LEN field in item
-		buffer[5] = FONT1;
+		buffer[5] = FONT0;
 		result = LIB_ListBox(start, &buffer[0], (UINT8 *)&os_list_ADMIN_MODE[0], 60); // wait for selection (T.O.=60sec)
 
 		switch(result)

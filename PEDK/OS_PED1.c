@@ -7783,10 +7783,10 @@ UINT8	PED_ADMIN_DeviceAuthenticationPhase1(void)
 
 
     LIB_LCD_Cls();
-    LIB_LCD_Puts(0, 0, FONT1, sizeof(os_msg_DEV_AUTH_1), (UINT8 *)os_msg_DEV_AUTH_1);
+    LIB_LCD_Puts(0, 0, FONT0, sizeof(os_msg_DEV_AUTH_1), (UINT8 *)os_msg_DEV_AUTH_1);
 
     // Request TID(8)
-	LIB_LCD_Puts(1, 0, FONT1, sizeof(os_msg_TERM_ID), (UINT8 *)os_msg_TERM_ID);
+	LIB_LCD_Puts(1, 0, FONT0, sizeof(os_msg_TERM_ID), (UINT8 *)os_msg_TERM_ID);
 
 	// read current TID
 	OS_SECM_GetData(ADDR_PED_TERM_ID, PED_TERM_ID_LEN, &tid[1]);
@@ -7803,9 +7803,9 @@ UINT8	PED_ADMIN_DeviceAuthenticationPhase1(void)
 	}
 
 	// show TID
-	LIB_LCD_Puts(1, 13, FONT1, PED_TERM_ID_LEN, &tid[1]);
+	LIB_LCD_Puts(1, 13, FONT0, PED_TERM_ID_LEN, &tid[1]);
 
-	if(LIB_GetNumKey(0, NUM_TYPE_DIGIT + NUM_TYPE_LEADING_ZERO, '_', FONT1, 2, 8, buffer) == FALSE)
+	if(LIB_GetNumKey(0, NUM_TYPE_DIGIT + NUM_TYPE_LEADING_ZERO, '_', FONT0, 2, 8, buffer) == FALSE)
 		return(apiOK); // aborted
 
 	if(!((buffer[0] == 1) && (buffer[1] == '0')))
@@ -7823,13 +7823,13 @@ UINT8	PED_ADMIN_DeviceAuthenticationPhase1(void)
 		OS_SECM_PutData(ADDR_PED_TERM_ID, PED_TERM_ID_LEN, &tid[1]);
 	}
 
-	LIB_LCD_ClearRow(1, 2, FONT1);
-	LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_PROCESSING), (UINT8 *)os_msg_PROCESSING);
+	LIB_LCD_ClearRow(1, 2, FONT0);
+	LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_PROCESSING), (UINT8 *)os_msg_PROCESSING);
 
     // init communication port
 	if(LIB_OpenAUX(COM1, auxDLL, COM_9600) == FALSE)
 	{
-		LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_FAILED), (UINT8 *)os_msg_LOAD_KEY_FAILED);
+		LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_FAILED), (UINT8 *)os_msg_LOAD_KEY_FAILED);
 		LIB_WaitTimeAndKey(300);
 		return apiFailed; // device error
 	}
@@ -8155,9 +8155,9 @@ EXIT:
         free(edcPubCert);
 
     if(result == apiFailed)
-        LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_FAILED), (UINT8 *)os_msg_LOAD_KEY_FAILED);
+        LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_FAILED), (UINT8 *)os_msg_LOAD_KEY_FAILED);
     else
-		LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_OK), (UINT8 *)os_msg_LOAD_KEY_OK);
+		LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_OK), (UINT8 *)os_msg_LOAD_KEY_OK);
 
 	LIB_CloseAUX();
 
@@ -8244,10 +8244,10 @@ UINT8	PED_ADMIN_DeviceAuthenticationPhase2(void)
     
 
     LIB_LCD_Cls();
-    LIB_LCD_Puts(0, 0, FONT1, sizeof(os_msg_DEV_AUTH_2), (UINT8 *)os_msg_DEV_AUTH_2);
+    LIB_LCD_Puts(0, 0, FONT0, sizeof(os_msg_DEV_AUTH_2), (UINT8 *)os_msg_DEV_AUTH_2);
 
     // Request TID(8)
-	LIB_LCD_Puts(1, 0, FONT1, sizeof(os_msg_TERM_ID), (UINT8 *)os_msg_TERM_ID);
+	LIB_LCD_Puts(1, 0, FONT0, sizeof(os_msg_TERM_ID), (UINT8 *)os_msg_TERM_ID);
 
 	// read current TID
 	OS_SECM_GetData(ADDR_PED_TERM_ID, PED_TERM_ID_LEN, &tid[1]);
@@ -8264,9 +8264,9 @@ UINT8	PED_ADMIN_DeviceAuthenticationPhase2(void)
 	}
 
 	// show TID
-	LIB_LCD_Puts(1, 13, FONT1, PED_TERM_ID_LEN, &tid[1]);
+	LIB_LCD_Puts(1, 13, FONT0, PED_TERM_ID_LEN, &tid[1]);
 
-	if(LIB_GetNumKey(0, NUM_TYPE_DIGIT + NUM_TYPE_LEADING_ZERO, '_', FONT1, 2, 8, buffer) == FALSE)
+	if(LIB_GetNumKey(0, NUM_TYPE_DIGIT + NUM_TYPE_LEADING_ZERO, '_', FONT0, 2, 8, buffer) == FALSE)
 		return(apiOK); // aborted
 
 	if(!((buffer[0] == 1) && (buffer[1] == '0')))
@@ -8284,13 +8284,13 @@ UINT8	PED_ADMIN_DeviceAuthenticationPhase2(void)
 		OS_SECM_PutData(ADDR_PED_TERM_ID, PED_TERM_ID_LEN, &tid[1]);
 	}
 
-	LIB_LCD_ClearRow(1, 2, FONT1);
-	LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_PROCESSING), (UINT8 *)os_msg_PROCESSING);
+	LIB_LCD_ClearRow(1, 2, FONT0);
+	LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_PROCESSING), (UINT8 *)os_msg_PROCESSING);
 
     // init communication port
 	if(LIB_OpenAUX(COM1, auxDLL, COM_9600) == FALSE)
 	{
-		LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_FAILED), (UINT8 *)os_msg_LOAD_KEY_FAILED);
+		LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_LOAD_KEY_FAILED), (UINT8 *)os_msg_LOAD_KEY_FAILED);
 		LIB_WaitTimeAndKey(300);
 		return apiFailed; // device error
 	}
@@ -8723,13 +8723,13 @@ EXIT:
     {
         authStatus = 0;
         
-        LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_VERIFY_FAILED), (UINT8 *)os_msg_VERIFY_FAILED);
+        LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_VERIFY_FAILED), (UINT8 *)os_msg_VERIFY_FAILED);
     }
     else
     {
         authStatus = 1;
 
-        LIB_LCD_PutMsg(2, COL_MIDWAY, FONT1 + attrCLEARWRITE, sizeof(os_msg_VERIFY_OK), (UINT8 *)os_msg_VERIFY_OK);
+        LIB_LCD_PutMsg(2, COL_MIDWAY, FONT0 + attrCLEARWRITE, sizeof(os_msg_VERIFY_OK), (UINT8 *)os_msg_VERIFY_OK);
     }
 
 	LIB_CloseAUX();
@@ -8773,10 +8773,10 @@ UINT8	PED_RequestNewPassword(UINT8 len, UINT8 *psw)
 
 
 	//    LIB_LCD_Cls();
-	LIB_LCD_ClearRow(1, 7, FONT1);
-	LIB_LCD_PutMsg(1, COL_LEFTMOST, FONT1 + attrCLEARWRITE, sizeof(os_msg_NEW_PASSWORD), (UINT8 *)os_msg_NEW_PASSWORD);
+	LIB_LCD_ClearRow(1, 7, FONT0);
+	LIB_LCD_PutMsg(1, COL_LEFTMOST, FONT0 + attrCLEARWRITE, sizeof(os_msg_NEW_PASSWORD), (UINT8 *)os_msg_NEW_PASSWORD);
 
-	if(LIB_GetNumKey(30, NUM_TYPE_STAR + NUM_TYPE_LEADING_ZERO + NUM_TYPE_LEFT_JUSTIFY, '_', FONT1, 2, len, buf1) == TRUE)
+	if(LIB_GetNumKey(30, NUM_TYPE_STAR + NUM_TYPE_LEADING_ZERO + NUM_TYPE_LEFT_JUSTIFY, '_', FONT0, 2, len, buf1) == TRUE)
 	{
 		if(buf1[0] < MIN_PED_PSW_LEN)	// 2014-10-15
         {
@@ -8797,9 +8797,9 @@ UINT8	PED_RequestNewPassword(UINT8 len, UINT8 *psw)
     }
 
 
-	LIB_LCD_PutMsg(1, COL_LEFTMOST, FONT1 + attrCLEARWRITE, sizeof(os_msg_CONFIRM_PASSWORD), (UINT8 *)os_msg_CONFIRM_PASSWORD);
+	LIB_LCD_PutMsg(1, COL_LEFTMOST, FONT0 + attrCLEARWRITE, sizeof(os_msg_CONFIRM_PASSWORD), (UINT8 *)os_msg_CONFIRM_PASSWORD);
 
-	if(LIB_GetNumKey(30, NUM_TYPE_LEADING_ZERO + NUM_TYPE_STAR + NUM_TYPE_LEFT_JUSTIFY, '_', FONT1, 2, len, buf2) == TRUE)
+	if(LIB_GetNumKey(30, NUM_TYPE_LEADING_ZERO + NUM_TYPE_STAR + NUM_TYPE_LEFT_JUSTIFY, '_', FONT0, 2, len, buf2) == TRUE)
 	{
 		if(buf2[0] < MIN_PED_PSW_LEN)	// 2014-10-15
         {
@@ -11088,3 +11088,42 @@ UINT8	PED_ShowTSN(UCHAR *tsn)
 
 	return apiOK;
 }
+
+// ---------------------------------------------------------------------------
+// FUNCTION: Write DHCP ENABLE flag.
+// INPUT   : flag
+//		     TRUE:	enable
+//		     FALSE:	disable
+// OUTPUT  : none.
+// RETURN  : apiOK
+//           apiFailed
+// ---------------------------------------------------------------------------
+#ifdef	_DHCP_ENABLED_
+UINT32	PED_SetStateDHCP(UINT16 flag)
+{
+	OS_SECM_PutData(ADDR_DHCP_FLAG, DHCP_FLAG_LEN, (UCHAR *)&flag);
+	return apiOK;
+}
+#endif
+
+// ---------------------------------------------------------------------------
+// FUNCTION: Write DHCP ENABLE flag.
+// INPUT   : none.
+// OUTPUT  : none.
+// RETURN  : TRUE	-- DHCP enabled.
+//           FALSE	-- DHCP disabled.
+// ---------------------------------------------------------------------------
+#ifdef	_DHCP_ENABLED_
+UINT32	PED_GetStateDHCP(void)
+{
+    UINT16	flag;
+
+
+	OS_SECM_GetData(ADDR_DHCP_FLAG, DHCP_FLAG_LEN, (UCHAR *)&flag);
+
+	if((flag == 0xFFFF) || (flag == 0x0000))
+	  return FALSE;
+	else
+	  return TRUE;
+}
+#endif

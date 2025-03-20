@@ -354,7 +354,7 @@ UINT16	crc16 = 0;
 	// out of range?
 	if( DataLen > (pUart->BufferSize) )
 	  {
-		  printf("@@@@@@@@2out of range\n");
+//		  printf("@@@@@@@@2out of range\n");
 	  os_AUX_RxDataBuffer[pUart->UartNum].Len = 0;
 	  
 	  os_AUX_Para[pUart->UartNum].RxFlag = FALSE;

@@ -34,18 +34,21 @@
 #define GPIO_8VBATT		3//GPIO4_IO14 printer thermal head
 #define GPIO_ISR		120//GPIO4_IO24 interrupt used EXTIO
 #define GPIO_SPI_CS		4//GPIO4_IO26 ecspi1 chip select pin
+#define GPIO_8VBATT_V2		5//GPIO4_IO20 (V2 PCB)
 //GPIO control path
 #define EXTIO_SEL0_VALUE      "/sys/class/gpio/gpio30/value"
 #define EXTIO_SEL1_VALUE      "/sys/class/gpio/gpio31/value"
 #define GPIO_STB_VALUE        "/sys/class/gpio/gpio117/value"
 #define GPIO_8VBATT_VALUE     "/sys/class/gpio/gpio110/value"
+#define GPIO_8VBATT_VALUE_V2  "/sys/class/gpio/gpio116/value"	// V2 PCB
 //GPIO export path
 #define GPIO_EXPORT           "/sys/class/gpio/export"
 //GPIO IO num
 #define EXTIO_SEL0_IONUM      30
 #define EXTIO_SEL1_IONUM      31
 #define GPIO_STB_IONUM        117
-#define GPIO_8VBATT_IONUM     110
+#define GPIO_8VBATT_IONUM     110	// V3 PCB
+#define GPIO_8VBATT_IONUM_V2  116	// V2 PCB
 #define GPIO_SPI_CS_IONUM	  122//GPIO4_IO26 ecspi1 chip select pin
 
 typedef	struct	BSP_GPIO_S		// TFT LCD parameters

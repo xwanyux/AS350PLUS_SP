@@ -113,6 +113,9 @@ SRC += $(wildcard ./SRED/*.c)
 #CFLAGS += -Iftp
 # SRC +=  $(wildcard ./ftp/*.c)
 
+CFLAGS += -ISFS/include
+SRC +=   $(wildcard ./SFS/*.c)
+
 
 
 #CFLAGS += -I../../../../usr/include
@@ -143,6 +146,7 @@ CFLAGS += -D _LAN_ENABLED_
 # CFLAGS += -D _4G_ENABLED_
 # endif
 CFLAGS += -D _build_DSS_
+CFLAGS += -D _DHCP_ENABLED_
 # CFLAGS += -D AS350PLUS_COUNTERTOP
 CFLAGS += -D AS350PLUS_WIRELESS
 CFLAGS += -D _SCREEN_SIZE_240x320 

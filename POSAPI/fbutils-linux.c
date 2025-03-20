@@ -61,6 +61,9 @@ static char *consoledevice;
 extern UINT8  Alphanumeric2BIG5[127][2];
 extern	unsigned char ext_font816[];
 OS_FDT		FDT[MAX_FDT_NO];
+
+extern	void LCD_BuildBitmap_16X32( uint8_t *OldBmp, uint8_t *NewBmp );	// defined in DEV_LCD.c
+
 UCHAR open_framebuffer(void)
 {
 	struct vt_stat vts;
@@ -145,7 +148,7 @@ UCHAR open_framebuffer(void)
 
 	xres_orig = var.xres;
 	yres_orig = var.yres;
-	printf("default xres=%d yres=%d\n",xres_orig,yres_orig);
+//	printf("default xres=%d yres=%d\n",xres_orig,yres_orig);
 	//rotation=3;
 	if (rotation & 1) {
 		/* 1 or 3 */
@@ -284,7 +287,8 @@ ULONG cnt=0;
 UCHAR *data, bits;
 UCHAR step;
 //set attribute
-UCHAR fid=para.Font;
+UCHAR fid=0;
+UCHAR attr=0;
 UCHAR fontHeight=para.FontHeight;
 UCHAR fontWidth=para.FontWidth;
 UCHAR* CDaddr;//custom code addr
@@ -295,16 +299,25 @@ OS_FDT	CustomFDT;
 //set color
 int FGcolidx,BGcolidx;
 int i=0, j=0,k=0;
-	UCHAR BGpalette[3]={para.BG_Palette[2],para.BG_Palette[1],para.BG_Palette[0]};
-	UCHAR FGpalette[3]={para.FG_Palette[2],para.FG_Palette[1],para.FG_Palette[0]};
+UCHAR BGpalette[3]={para.BG_Palette[2],para.BG_Palette[1],para.BG_Palette[0]};
+UCHAR FGpalette[3]={para.FG_Palette[2],para.FG_Palette[1],para.FG_Palette[0]};
+
+UCHAR	data2[64];
+
+	
 	memmove(&BGcolidx,&BGpalette,3);
 	memmove(&FGcolidx,&FGpalette,3);	
 	setcolor(0, BGcolidx);
 	setcolor(1, FGcolidx);
 	BGcolidx=0;
 	FGcolidx=1;
-	// printf("@@fid=%d\n",fid);
 	
+	fid  = para.Font & 0x0F;	// fid
+	attr = para.Font & 0xF0;	// attr
+//	printf("\rfid=%x , attr=%x \n", fid, attr );
+	
+	// printf("@@fid=%d\n",fid);
+#if	0	// JAMES
 	if((fid<=FONT_1)||(fid==FONT12))
 	{
 		if(fid==FONT1){
@@ -368,7 +381,118 @@ int i=0, j=0,k=0;
 		// 		}
 		// 	}
 	}
-	else
+#else
+	if( (fid & 3) < FONT2 )
+	{
+	switch( fid & 3 )
+		{
+		case	FONT0:	// FONT0 or FONT10 (LCDTFT_FONT0)
+			
+			if( !(attr & attrISO) )
+			  {
+			  // PLUS normal font
+			  data=&ext_font816[0];
+			  fontLen=16;
+			  fontWidth=8;
+			  fontHeight=16;
+			  }
+			else
+			  {
+			  // X6 extended font
+			  data=&ASCII_FONT_12X24[0];
+			  fontLen=48;
+			  fontWidth=16;
+			  fontHeight=24;
+			  c-=0x20;
+			  }
+			
+			break;
+			
+		case	FONT1:	// FONT1 or FONT11 (LCDTFT_FONT1)
+
+			if( !(attr & attrISO) )
+			  {
+			  // PLUS normal font
+			  data=&ASCII_FONT_12X24[0];
+			  fontLen=48;
+			  fontWidth=16;
+			  fontHeight=24;
+			  c-=0x20;
+		          }
+		        else
+		          {
+		          // X6 extended font (FONT0 8x16 --> 16x32)			  
+			  data=&ext_font816[0];	
+			  fontLen=16;
+			  fontWidth=8;
+			  fontHeight=16;
+		          }
+				
+			break;
+		}
+		
+		step=fontLen/fontHeight;
+		// if(rotation==0||rotation==2)
+		if( !(attr & attrISO) )
+		  {
+			for (i = 0; i < fontLen;i++) 
+			{
+				bits = *(data+fontLen * c + i);
+				for (j = 0; j < fontWidth; j++, bits <<= 1)
+				{
+					if(j==8)
+					{
+						i++;
+						bits = *(data+fontLen * c + i);
+					}
+					if (bits & 0x80)
+						pixel(x + j, y + (i/step), FGcolidx);
+					else
+						pixel(x + j, y + (i/step), BGcolidx);
+				}
+			}
+		  }
+		else
+		  {
+		  // X6 extended font (FONT0 8x16 --> 16x32)
+		  
+//		  printf("\n");
+//		  for( k=0; k<16; k++ )
+//		     printf("%02x ", *(data+fontLen*c+k) );
+//		  printf("\n");
+		  
+		  LCD_BuildBitmap_16X32( data+fontLen*c, data2 );
+
+//		  printf("\n");
+//		  for( k=0; k<64; k++ )
+//		     printf("%02x ", *(data2+k) );
+//		  printf("\n");
+
+			fontLen=64;
+			fontWidth=16;
+			fontHeight=32;
+			step=fontLen/fontHeight;
+
+			for (i = 0; i < fontLen;i++) 
+			{
+				bits = *(data2 + i);
+				for (j = 0; j < fontWidth; j++, bits <<= 1)
+				{
+					if(j==8)
+					{
+						i++;
+						bits = *(data2 + i);
+					}
+					if (bits & 0x80)
+						pixel(x + j, y + (i/step), FGcolidx);
+					else
+						pixel(x + j, y + (i/step), BGcolidx);
+				}
+			}
+		  }
+	}
+#endif
+	else	// fid >= FONT2
 	{
 		// printf("fid=%d ",fid);
 		fontHeight	=FDT[fid].Height;
@@ -481,10 +605,17 @@ OS_FDT	*pFdt;
 		BIG5CODE[0]=Alphanumeric2BIG5[*Bg5cd][0];
 		BIG5CODE[1]=Alphanumeric2BIG5[*(Bg5cd++)][1];
 		*/
+#if	0	// JAMES
 		if((fid==FONT2)||(fid==FONT12))//24*24
 			fid=FONT12;//12*24
 		else//16*16
 			fid=FONT1;//8*16
+#else
+		if( (fid & 3) < FONT2 )
+		  fid = FONT1;	// 12x24
+		else
+		  fid = FONT0;	// 8x16
+#endif
 		pFdt = OS_FONT_GetFdtAddr( fid );
 		
 		FONT_BYTE=pFdt->ByteNo;
@@ -523,6 +654,7 @@ OS_FDT	*pFdt;
 	BGcolidx=0;
 	FGcolidx=1;
 	// printf("para.FontHeight=%d  para.FontWidth=%d\n",para.FontHeight,para.FontWidth);
+	// printf("\rput_Big5char() x=%x, y=%x \n", x, y);
 	for (i = 0; i < para.FontHeight; i++) {//Big5 chinese font
 		for (j = 0; j < para.FontWidth; j++,k++, *bit <<= 1){
 			if(k==8){bit++;k=0;}
@@ -543,15 +675,37 @@ OS_FDT	*pFdt;
 void put_Bg5string(int32_t x, int32_t y, UCHAR *s, API_LCDTFT_PARA para,ULONG fontLen)
 {
 	int32_t i;
+	OS_FDT	*pFdt = 0;
+	API_LCDTFT_PARA para1;
+	
 	// printf("fontLen=%d\n",fontLen);
+	//printf("\rput_Bg5string() x=%x, y=%x \n", x, y);
 	for(i = 0; i<fontLen; i++ ){
 		if(*s<0x20)
 			return;
-		put_Big5char(x, y, s, para,fontLen);
+		
+		if( ((para.Font & 0x0F) == FONT2) && (*s<0x7F) && (*s>0x19) )	// JAMES
+		  {
+		  memmove( &para1, &para, sizeof(API_LCDTFT_PARA) );
+		  
+		  pFdt = OS_FONT_GetFdtAddr( LCDTFT_FONT1 );
+		  para1.Font = pFdt->FontID + (para.Font & 0xF0);
+		  para1.FontHeight = pFdt->Height;
+		  para1.FontWidth  = pFdt->Width;
+		  
+		  put_Big5char(x, y, s, para1,fontLen);
+		  }
+		else
+		  put_Big5char(x, y, s, para,fontLen);
+		  
 		if((*s<0x7F)&&(*s>0x19))
 		{
 			
-			x += (para.FontWidth/2);
+		//	x += (para.FontWidth/2);
+			if( pFdt )
+			  x += para1.FontWidth;
+			else
+			  x += para.FontWidth;
 			s++;
 		}							
 		else
@@ -568,7 +722,7 @@ void put_string(int32_t x, int32_t y, char *s, API_LCDTFT_PARA para, ULONG Len)
 {
 int32_t i;	
 UINT16 fontLen=0;
-UCHAR fid=para.Font;
+//UCHAR fid=para.Font;
 int FGcolidx,BGcolidx;
 	UCHAR BGpalette[3]={para.BG_Palette[2],para.BG_Palette[1],para.BG_Palette[0]};
 	UCHAR FGpalette[3]={para.FG_Palette[2],para.FG_Palette[1],para.FG_Palette[0]};

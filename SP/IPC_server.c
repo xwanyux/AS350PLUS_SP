@@ -5485,8 +5485,8 @@ int main()
     if(!Tamper_IsSecureDevice())
     {
         LIB_LCD_Cls();
-        LIB_LCD_Puts(0, 4, FONT2 + attrREVERSE, strlen(" WARNING "), (UINT8 *)" WARNING ");
-        LIB_WaitKeyMsgYesNoTO(7, 8, strlen("Please reload legal SP"), (UCHAR *)"Please reload legal SP");
+        LIB_LCD_Puts(0, 5, FONT2 + attrREVERSE, strlen(" WARNING "), (UINT8 *)" WARNING ");
+        LIB_WaitKeyMsgYesNoTO(7, 3, strlen("Please reload legal SP"), (UCHAR *)"Please reload legal SP");
         DSS_main();
     }
 #endif
